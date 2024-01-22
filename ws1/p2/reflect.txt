@@ -1,0 +1,151 @@
+/*
+*****************************************************************************
+                          OOP244 Workshop - #1 REFLECTION (P2)
+Full Name  : Anna Sychikova
+Student ID#: 159363217
+Email      : asychikova@myseneca.ca
+Section    : NCC
+Date       : 2023.09.12
+I have done all the coding by myself and only copied the code that my professor 
+provided to complete my workshops and assignments.
+*****************************************************************************
+*/
+
+This week, special attention was paid to such concepts as namespaces, modularity and compilation safeguards.
+
+It is better to use modules instead of a single file (especially in complex projects) as this gives a better organization, as well as the ability to reuse parts of the code. Modules allow you to break the code into more manageable blocks and each module can be focused on a specific functionality of the program(for example, for this workshop was created Phone, cStrTools and main modules). 
+Modules allow to define namespaces (
+
+using namespace std;
+
+namespace sdds {
+	//code
+}
+
+) for code, which helps to avoid name conflicts between different parts of the program, and can also reduce compilation time. 
+In the future, working on large projects, modularity will allow to quickly understand the basic logic of the code and each member of the development team will be able to concentrate on a specific module.
+
+This week I used compilation safeguards, which looks like this: 
+
+#ifndef CSTRTOOLS_H
+#define CSTRTOOLS_H
+//code
+#endif 
+
+One of the advantages of using compilation safeguards is to prevent repeated inclusion of the header file in the source file. compilation safeguards ensure that the header file is processed only once during compilation, which avoids repeated declarations of functions, classes and variables (which will lead to an error).
+
+Now I will explain the logic of W1P2: 
+
+	The program contains modules: Phone, cStrTools and directory main module and reads phone data records from a file, allowing clients to search for phone records by entering an incomplete name and, regardless of the case of the entered characters, displays records corresponding to the entered data. 
+  
+--MAIN:--
+
+--Directory.cpp : This is the main program file in which the main function defined. It calls the phoneDir function with the name of the Star Wars program and the file name "phones.txt ":
+ 
+int main() {
+
+    phoneDir("Star Wars", "phones.txt");
+    return 0;
+    
+}
+
+It includes the section "Phone.h" header file.
+
+  
+--PHONE MODULE:--
+
+--Phone.h: Header file contains the phoneDir function declaration, const value of maxRecords, and struct PhoneRecord to store individual phone records, which looks like:
+* Firstly, I had const value of maxRecords and struct declaration in Phone.cpp file, but I decided to replace them to header file for Phone module. 
+
+(namespace sdds {
+
+
+const int maxRecords = 50;
+        struct PhoneRecord {
+            char name[51]; //name fields
+            char areaCode[4]; 
+            char prefix[4]; 
+            char number[5];
+        };
+void phoneDir(const char* programTitle, const char* fileName);
+    
+})
+
+
+
+--Phone.cpp : This is the phoneDir (void phoneDir(const char* programTitle, const char* fileName);) function implementation file.
+This function accepts two parameters: programTitle (program name) and fileName (file name).
+
+The file is read using fopen. If the file does not exist, customer will see an error message :      (   FILE* fptr = fopen(fileName, "r"); //reading file 
+        if (!fptr) { //if file is not opened
+            cout <<fileName << " file not found!" << endl; //error message
+            cout << "Thank you for using " << programTitle << " directory."<< endl; //if file is opened
+            return; );
+
+        Program reads up to a maximum of 50 phone records from a Phone.h file ( const int maxRecords = 50;) using a while loop ( 
+	PhoneRecord records[maxRecords];
+        int recordCount = 0;
+        while (recordCount < maxRecords){
+            int result=fscanf(fptr, "%[^\t]\t%s\t%s\t%s\n", //name, areaCode, prefix, number
+                records[recordCount].name, records[recordCount].areaCode, records[recordCount].prefix, records[recordCount].number);
+            if (result != 4) {
+                break;
+            }
+            recordCount++;
+        }). Each record is read using fscanf, and if the fscanf call does not return the value 4 (all fields), the loop is interrupted.
+
+        After reading the phone records, the program goes into a cycle of interaction with the client, below is a cycle of searching for phone records by a partial name entered by the client. The client can exit the loop by typing "!": (
+	char partialName[51];
+        cout << "Enter a partial name to search (no spaces) or enter '!' to exit" << endl;
+        cout << "> ";
+
+        while (cin >> partialName) {
+            if (partialName[0] == '!'){ //checks if the first character of the partialName string is equal to "!" ,if "!" then exit
+                break;
+            })
+
+        Inside the search loop, both the partial name and the record name are converted to lowercase using the toLowerCaseAndCopy function (to make the search case insensitive). Then the strStr function  is used to check if the partial name is part of the record name. If a match is found, the program prints the corresponding entry from the file: for (int i = 0; i < RecordCount; i++){
+char lowercaseName[51];
+            strCpy(lowercaseName, records[i].name); //for each record being checked, it creates a new character array lowercaseName and copies the name from the record (records[i].name) into it. 
+
+            toLowerCaseAndCopy(lowercaseName, lowercaseName);
+            toLowerCaseAndCopy(partialName, partialName);
+         
+                if (strStr(lowercaseName, partialName) != nullptr) {//checks if the lowercase partialName is a substring of lowercaseName
+                    cout << records[i].name << ": (" << records[i].areaCode << ") " << records[i].prefix << "-" << records[i].number << endl;
+                }
+            }
+
+        The search cycle continues until the user enters "!".
+        If the client enters "!", the file is closed using fclose (fclose(file), and a message is printed before the program exits:
+        cout << "Thank you for using " << programTitle << " directory." << endl;
+    } )
+
+--CSTRTOOLS MODULE:--
+
+--cStrTools.h and cStrTools.cpp : 
+These files define functions (.h - function prototypes .cpp - implementation) to help with string manipulation and comparisons used in the phoneDir function. The code works both with strings where characters belong to different registers and with a partially entered name. The program reads phone records from a file, and displays matching records.
+        toLower: Converts a character to lowercase.
+        strnCmp: Compares two strings up to a given length.
+        strCpy: Copies one string to another.
+        strLen: calculates the length of the string.
+        toLowerCaseAndCopy: Converts a string to lowercase and copies it to another string.
+        strStr: Searches for a substring inside a string.
+These functions are reusable and used for part 1 of ws 1. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
