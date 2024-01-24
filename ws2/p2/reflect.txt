@@ -1,0 +1,235 @@
+/*
+*****************************************************************************
+                          OOP244 Workshop - #2 REFLECTION (P2)
+Full Name  : Anna Sychikova
+Student ID#: 159363217
+Email      : asychikova@myseneca.ca
+Section    : NCC
+Date       : 2023.09.22
+*****************************************************************************
+*/
+
+This week, special attention was paid to such concepts as
+allocation and deallocation of dynamic memory for an array,
+overloaded functions and references.
+I used Dynamic Memory Allocation and deallocation for memory.
+using a fixed-size array would be problematic, for the reason that since the number of records in the file is unknown in advance. Dynamic allocation allows to allocate memory as needed, depending on the data in the file.
+
+--MAIN:--
+
+Main function declares a 4-character array code for storing zip codes:
+char code[4];
+
+
+Next comes the while loop, which continues until getPostalCode function returns true. Inside this loop, the user enters a zip code, and if he enters "!", the loop ends.
+Inside the loop, load function is called with the file name "PCpopulationsComplete.csv" and code specified by the user (code). If load returns true, indicating that the data has been loaded successfully, then called the display function to display the loaded data.
+
+After displaying data, deallocate Memory function releases dynamically allocated memory.
+
+
+--POPULATION:--
+
+Struct Population, which contains code and population:     
+
+struct Population {
+        char* m_code;
+        int population ;
+    };
+
+Population* populations;
+int numPopulations = 0 ;
+
+Population* populations;
+is a pointer to the population structure (
+Struct Population which contains code and population:     
+
+struct Population {
+        char* m_code;
+        int population ;
+    };) 
+
+that will be used to dynamically allocate an array of population objects. int numPopulations is an integer for the number of objects in an array.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sort() function is responsible for sorting the populations array based on the population field of each Population object. Sort orders objects based on population (from smaller to larger number).
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+getPostalCode() function gives user to enter a postal code prefix. 
+getPostalCode() displays the header: 
+
+  	cout<< "Population Report"<< endl;
+        cout<< "-----------------"<< endl ;
+        cout <<"Enter postal code:" << endl;
+        cout<< "> ";
+
+accepts input using cin.getline(): 
+
+        cin.getline( partial_postal_code_prefix, 4);
+
+and saves it to  partial_postal_code_prefix. Return true if the user does not enter "!" to exit, in which case it returns false: 
+
+      return strcmp( partial_postal_code_prefix, "!" ) != 0;
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+load() function reads data from a file, and filters entries based on partial_postal_code_prefix. If the code matches the prefix (or "all"), load() dynamically allocates memory for a new Population object, copies matching data, updates the array, and increments numPopulations. Then load() close file and returns true if successful. 
+
+File opens in the load() function. If file cannot be opened, there will be output with an error message and the value false is returned: 
+
+(bool load( const char* filename, const char* partial_postal_code_prefix) {
+    FILE* fptr = fopen(filename, "r" );
+    if (!fptr ) {
+        cout<< "Error: Cannot open file " <<filename << endl ;
+        return false;
+    })
+
+Next, numPopulations, postalCode and population will help store reading data from the file: 
+
+    numPopulations = 0; //for count records
+    char postalCode[4]; //value from file
+    int population; //value from file
+
+Overloaded read functions is used (from File.cpp) to read postal codes and population from a file:
+ 
+    ( read(fptr, postalCode ) && read( fptr, population) )
+
+This continues until both the read(fptr, PostalCode) and read(fptr, population) parameters return true, indicating that the postalCode and population values have been successfully read from the file.
+
+ Inside the loop, this condition: 
+
+ (strcmp( partial_postal_code_prefix, "all" ) == 0 || strncmp( postalCode, partial_postal_code_prefix, strlen( partial_postal_code_prefix) ) == 0 ) 
+
+checks whether the postal code matches the provided partial_postal_code_prefix or the prefix is "all".
+The user is prompted to enter a postal code prefix using the 
+
+	cin.getline(patrial_postal_code_prefix, 4); //from getPostalCode function.
+
+Value entered by the user is stored in the partial_postal_code_prefix variable.
+
+After, load compares the user's input (stored in partial_postal_code_prefix) with the postal code read from the file (stored in postalCode).
+
+    If the user input matches the postal code from the file, or if the user input is a prefix that matches the beginning of the postal code (for example user input is "A1" and postalCode is "A1A"), then the condition true, and the code inside the if block will be executed.
+ If there is a match, the data is good for inclusion in a dynamic array.
+
+
+To measure new data, new dynamic array of new populations is created: 
+
+Population* new populations = new population[ number of populations + 1] ;
+
+
+Existing population data (if any) from the old population array is copied to new population array:
+
+for (int i = 0; i < numPopulations; i++ ) {
+New populations[i] = populations[i];
+}
+
+
+Inside the newPopulations array, memory is dynamically allocated to store both the zip code (m_code) and the population value: 
+
+In this line, memory is allocated for m_code member of Population structure.
+new char[strlen(postalCode) + 1] dynamically allocates memory for a character array (a string) that 
+can store the postal code (m_code).
+strlen(postalCode) calculates length of the postalCode string.
+The allocated memory is assigned to newPopulations[numPopulations].m_code, which is a pointer to 
+postal code for the new population record:
+
+newPopulations[numPopulations].m_code = new character[strlen(postal code) + 1 ];
+
+
+Postal code data from postalCode variable is copied into allocated memory:
+
+strcpy(newPopulations[numPopulations].m_code, postalCode);
+
+
+Assigns the integer value to population, ensuring that population data is stored within the new population record:
+
+newPopulations[numPopulations].population = population;
+
+
+To prevent memory leaks, old populations array deallocated:
+
+delete[] populations;
+
+
+Populations are updated, which indicates new populations by adding new data to the populations:
+
+populations = newPopulations;
+
+
+The number of populations (numPopulations) is increasing++:
+
+numPopulations++;
+
+
+After reading all the relevant data from the file, file close using fclose(fptr) and return true, indicating a good download:
+
+    fclose(fptr);
+    return true;
+
+If user enters "A1" as the partial_postal_code_prefix, load function will load and store in the array only the data from the file where the postal code matches "A1." All other data with different postal codes will be skipped and not included in the array.
+There are 2 arrays (populations and newPopulations), because the code needs to dynamically resize the array to change an unknown number of population records, because for zip code A1, the number of matching records will be different for "all", and the size of the array needs to be changed.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+display() function is responsible for displaying sorted population data and total count of Population. It sorts array of populations by calling the sort() function: 
+     sort(); 
+, and then prints sorted data: 
+        for ( int i = 0;i < numPopulations; i++) {
+            cout<< i + 1 << "- " << populations[i].m_code << ":  " <<populations[i].population<<endl;
+        }
+        cout<< "-------------------------"<< endl ;
+
+Also display() counts total population: 
+
+        int totalPopulation = 0;
+        for ( int i = 0; i < numPopulations;i++) {
+            totalPopulation += populations[i].population;
+        }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+deallocateMemory() function free dynamically allocated memory for the populations array. It iterates over each Population object, free memory for m_code field: 
+
+        for ( int i = 0;i < numPopulations; i++) {
+            delete[] populations[i].m_code;
+        }
+
+ deletes array, set populations to nullptr, and set numPopulations to 0: 
+
+        delete[] populations ;
+        populations = nullptr;
+        numPopulations = 0;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Population.h: population structure contains a structure for recording population with a postal code (m_code) and the number of population (population).
+
+file contains  prototypes of functions, including sort, getPostalCode, load, display, deallocateMemory.
+
+--FILE:--
+
+in File.cpp file, overloaded read functions for reading zip codes and population from the file. These two reading functions are used in different ways: one reads the zip code string, and the other reads the population integer. They are overloaded because they have the same name, but different types of parameters. These functions use fscanf to read data and return true if the data is successfully read, and false otherwise: 
+
+
+    bool read(FILE* fptr, char* postalCode ) {
+        if (fscanf( fptr, "%3s,", postalCode) == 1 ) {
+            return true;
+        }
+        return false;
+    }
+
+    bool read(FILE* fptr, int& population ) {
+        if ( fscanf(fptr, "%d,", &population) == 1) {
+            return true;
+        }
+        return false ;
+    }
+
+File.h contains function prototypes for read. 
+
+
