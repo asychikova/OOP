@@ -1,0 +1,228 @@
+/*
+*****************************************************************************
+                          OOP244 Workshop - #3 REFLECTION (P2)
+Full Name  : Anna Sychikova
+Student ID#: 159363217
+Email      : asychikova@myseneca.ca
+Section    : NCC
+Date       : 2023.09.30
+*****************************************************************************
+*/
+
+This week, special attention was paid to such concepts as class type, member functions (to change and query state of an object), standard library facilities in order to format data, dynamic allocation and deallocation of memory within a class. 
+
+The second part of workshop is based on the first and uses functions from part 1. 
+
+--TRAIN:--
+
+LOAD: 
+
+Load function prompts user to input the number of passengers boarding train.
+
+It checks input: 
+if it's non-positive, nobody boards; 
+if it more than maximum number of passengers, only portion boards.
+
+Load function updates notBoarded with the count of passengers not boarded and returns true if train is fully board or false if some passengers are left.
+Function is a member of Train class and takes integer reference notBoarded as a parameter. It returns true if boarding is successful, false if not:
+
+	bool Train::load(int& notBoarded)
+
+Load prompts to enter number of passengers. Input is stored in passengersBoarding variable: 
+
+        int passengersBoarding;
+        cout << "Enter number of passengers boarding:"<< endl;
+        cout<< "> " ;
+        cin >>passengersBoarding;    
+
+If input is zero or negative, it means no passengers boarding. NotBoarded is set to 0,  and the function returns false: 
+
+        if (passengersBoarding<= 0) {
+            notBoarded =0;
+            return false;
+         }
+
+If there is space on the train: 
+
+ 	if (passengersBoarding+ passengers <= MAX_NO_OF_PASSENGERS) 
+
+new passengers are added to the train, notBoarded is set to 0, all passengers boarded, and the function returns true: 
+
+            passengers += passengersBoarding;
+            notBoarded =0;
+            return true;
+
+If there is no enough space, notBoarded is set to the number of passengers that couldn't be boarded, and the train is loaded to its maximum capacity. notBoarded = user input + existing passengers - max of passengers. The function then returns false: 
+
+            notBoarded = passengersBoarding + passengers- MAX_NO_OF_PASSENGERS ;
+            passengers = MAX_NO_OF_PASSENGERS;
+            return false;
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+UPDATEDEPARTURETIME
+
+updateDepartureTime function allows users to change departure time of a train if the input time is good.
+
+It takes user input for new departure time: 
+
+        int newDepartureTime ;
+        cout <<"Enter new departure time:" <<endl;
+        cout << "> " ;
+        cin>> newDepartureTime;
+
+
+If input is a valid time: 
+
+if ( validTime(newDepartureTime))  //validTime checks if time more or equal to MIN_TIME and less 
+//or equal to MAX_TIME and also check if minutes less or equal to 59
+
+        {
+            departureTime = newDepartureTime;
+            return true ;
+        } 
+
+updates the departure time and returns true.
+If input time is invalid, it sets the departure time to -1 and returns false what means that departure time is not renewed: 
+
+            departureTime = -1;
+            return false;
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+TRANSFER
+
+transfer function combines passengers from one train to another train if there is enough capacity. 
+
+Example: 
+
+passangers from train A being transfered to train C: 
+
+transfer(C, A);
+
+This function is called with C as train "to" and A as the source train "from".
+
+    bool Train::transfer(const Train& from) {
+        
+First, function checks if destination train (C) or the source train (A) is in an invalid state.
+        If for example both trains are invalid, (if they doesn't have a valid name, passengers count, or departure time), the transfer can't be processed, and function returns false: 
+
+    if (isInvalid() || from.isInvalid()) { return false; } //isInvalid checks if train do not have 
+//valid name/passengers/time
+
+If one of them valid, it shows just the state of valid train and for another one prints "Train is an invalid State!" 
+       
+If both valid, it calculates the total number of passengers after combining the passengers from C and A:
+
+    int totalPassengers = passengers + from.noOfPassengers();
+
+If total number of passengers is less or equal to maximum allowed number of passengers(1000):
+       
+    if (totalPassengers <= MAX_NO_OF_PASSENGERS)
+
+the transfer allowed:
+
+passengers from A are added to the passengers of C.
+name of trains is combined: 
+
+	char* combinedName = new char[ strlen(name )+ strlen(from.getName() ) + 3]; //+3 for null terminator, space and comma
+
+ 	char* combinedName = new char[strlen(name) + strlen(from.getName()) + 3]; //dynamically 	alocated memory to store new concat name +3 because of space, null terminator and comma
+	strcpy(combinedName, name); //copy new combination of names to name
+	strcat(combinedName, ", "); // ", " after null terminator of combinedName
+	strcat(combinedName, from.getName()); //concatenates the name of the "from" train (A) to 
+//the  end of the name of the "to" train (C), separated by a comma and a space
+
+If there is enough space, dynamically allocates memory for the combined name, updates the departure time if time of "from" train less than time of "to" train, and adjusts the passenger count. 
+
+        delete[] name;
+        name = combinedName;
+        passengers = totalPassengers;
+
+departure time of C  updated if A has a later departure time: 
+
+        if ( departureTime < from.getDepartureTime() ) 
+        {
+            departureTime = from.getDepartureTime();
+        }
+
+        return true; //true indicate successful transfer
+
+If total number of passengers after combining C and A exceeds the maximum capacity, transfer can't load all passengers.
+
+It calculates how many passengers cannot be boarded:
+
+	int passengersNotBoarded= totalPassengers - MAX_NO_OF_PASSENGERS;
+
+Displays a message indicating how many passengers could not be boarded from train A.
+
+	cout<< "Train is full; " <<passengersNotBoarded <<" passengers of "<<from.getName() << " could not be boarded!" <<endl ;
+
+Passenger of C takes maximum allowed capacity: 
+
+	passengers = MAX_NO_OF_PASSENGERS;
+
+Updates name of C with combined name:
+
+ 	char* combinedName = new char[strlen(name) + strlen(from.getName()) + 3]; //dynamically 	alocated memory to store new concat name +3 because of space, null terminator and comma
+	strcpy(combinedName, name); //copy new combination of names to name
+	strcat(combinedName, ", "); // ", " after null terminator of combinedName
+	strcat(combinedName, from.getName()); //concatenates the name of the "from" train (A) to 
+//the  end of the name of the "to" train (C), separated by a comma and a space
+
+        delete[] name;
+        name = combinedName;
+
+And displays a message that transfer completion:
+
+        cout<< "Transfer Complete:" <<endl;
+
+The function returns false to indicate that the transfer was partial due to capacity.
+
+How it works: 
+
+First transfer
+
+(transfer (C, A), from: A, to: C):
+Result: Train A is invalid, time(300) is less than necessary(700). The message "Transfer failed!".
+
+
+Second transfer 
+
+(transfer (A, C), from: C, to: A):
+
+Result: Train A is invalid, time A is still less than the minimum(700). The message "Transfer failed!".
+
+
+Boarding passengers on A (A.set(50, 2200))
+Now train A is designed for 50 passengers, and the departure time is 2200 which is valid.
+
+
+Third transfer
+
+(transfer (C, A), from: A, to: C):
+Result: successful transfer from point A to point C. C train now has 450 passengers from C and 50 passengers from A.
+
+train C's name becomes "Seneca Express C, Seneca Express A" after successful transfer of passengers from A to C due to combination of names: 
+
+	char* combinedName = new char[strlen(name) + strlen(from.getName()) + 3]; //dynamically 	alocated memory to store new concat name
+	strcpy(combinedName, name); //copy new combination of names to name
+	strcat(combinedName, ", "); // ", " after null terminator of combinedName
+	strcat(combinedName, from.getName()); //concatenates the name of the "from" train (A) to 
+//the  end of the name of the "to" train (C), separated by a comma and a space
+
+	delete[] name; //delete old name
+	name = combinedName; 
+
+
+Fourth transfer 
+transfer (D, C), from: C, to: D):
+C (in which the same passengers A from the previous transfer)
+
+Train C has a total of 500 passengers (450 from C and 50 from A), it is trying to transfer to D, which already have 560 passengers. Since max capacity of passangers is 1000, 60 passengers could not be transported. The message "The train is full; 60 Seneca Express C, Seneca Express A passengers could not board!" is displayed. 
+Combined passengers (450 from C, 50 from A) transfer to D. The message "Transfer completed" is displayed, showing D with a total of 1000 passengers.
+
+
+
+
+
+
