@@ -718,9 +718,9 @@ void AidMan::shipItems() responsible for creating shipping file, removing items 
 
 
 
-  	     +--------------------------------+
-		          Date            
-             +--------------------------------+
+   	    +--------------------------------+
+			  Date
+	    +--------------------------------+
 
 Class Date contain private data members m_year, m_month, m_day, m_state (of type Status), m_formatted and uniqueDateValue(). Member functions are public. 
 
@@ -962,9 +962,9 @@ Class Utils contain private data member m_testMode. Member functions are public.
     
 
 
-  	     +--------------------------------+
-		          Menu            
-             +--------------------------------+
+   	    +--------------------------------+
+			  Menu
+	    +--------------------------------+
 Class Menu have private data members content of the menu and the number of options available. Member functions are public. 
 
 Menu::Menu(const char* options): constructor for Menu class. take string of menu options and initialize menuContent, count number of options based on newlines. Validate menu by check number of options and whether menuContent is nullptr.
@@ -1030,15 +1030,14 @@ Menu::run() in more details:
         }
     }
 
-
-  	     +--------------------------------+
-		          iProduct            
-             +--------------------------------+
+   	    +--------------------------------+
+			iProduct
+	    +--------------------------------+
 iProduct is an abstract base class with pure virtual functions, defining an interface for products.
 
-  	     +--------------------------------+
-		          Item            
-             +--------------------------------+
+   	    +--------------------------------+
+			  Item
+	    +--------------------------------+
 Item is a concrete class that contain implementation of iProduct virtual functions.It include functions to read, display and modify information about items. Clear function is used to clean dynamically allocated memory and reset the Item. Item have private data members SKU, price, quantity on hand, needed quantity, description, and flags indicating whether the item is linear. Protected data member m_status of type Status. All member functions are public. 
 
 
@@ -1366,9 +1365,9 @@ void Item::clear() {
 
 
 
-  	     +--------------------------------+
-		          Perishable            
-             +--------------------------------+
+   	    +--------------------------------+
+		      Perishable
+	    +--------------------------------+
 
 In this part of project was created Perishable class which have public member functions(some of them override virtual functions from base class Item). Also it have private data members Date m_expiry, and 
 char* m_handlingInstructions. m_expiry is object of Date and m_handlingInstructions is pointer to character array.
@@ -1560,10 +1559,9 @@ Read function in Perishable class responsible for reading input to Perishable cl
 
 ____________________________________________________________________________
 
-
-  	     +--------------------------------+
-		          NOTES           
-             +--------------------------------+
+   	    +--------------------------------+
+			 NOTES
+	    +--------------------------------+
 Classes allows to create custom data types that combine data and functions that work with that data. Data and functions within a class are called members. Class members are accessed through the member selection operator. (or through the -> operator if access the element through a pointer).
 
 -> (Member Access Operator for Pointers) is used to access a member of an object that is referenced by a pointer.
