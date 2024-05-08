@@ -1,0 +1,359 @@
+/*
+*****************************************************************************
+            OOP244 Workshop - #8 REFLECTION (P1 of WS9 and MS4)
+Full Name  : Anna Sychikova
+Student ID#: 159363217
+Email      : asychikova@myseneca.ca
+Section    : NCC
+Date       : 2023.11.24
+*****************************************************************************
+*/
+
+This week, special attention was paid to such concepts as rule of three to a class and its descendants.
+
+The Rule of three states that if class need a custom implementation for Destructor, Constructor or Copy assignment operator, it likely needs to provide custom implementations for all three of them.
+The rule of three prevents memory leaks and double deletions (what I often encounter). 
+
+Example: 
+
+#include <iostream>
+#include <cstring>
+
+class Animal {
+private :
+    char* name;
+
+public:
+    // Constructor
+    Animal(const char* str) {
+        name = new char[strlen(str) + 1 ];
+        strcpy(name, str );
+    }
+
+    // Destructor
+    ~Animal() {
+        delete[] name;
+    }
+
+    // Copy Constructor
+    Animal(const Animal& other) {
+        name = new char[strlen(other.name) + 1];
+        strcpy(name, other.name) ;
+    }
+
+    // Copy assignment operator
+    Animal& operator=(const Animal& other) {
+        if (this != &other) {
+            delete[] name ;
+            name = new char[strlen(other.name) + 1];
+            strcpy(name, other.name);
+        }
+        return *this;
+    }
+
+    void display() const {
+        std::cout <<"Name of animal: "<< name<<std::endl;
+    }
+};
+
+int main() {
+    // create an object using constructor
+    Animal ani1("Horse");
+
+    // create 2nd animal object and use copy constructor in order to assign value of 1st animal to it
+    Animal ani2 = ani1;
+
+    // display objects 1 and 2
+    std::cout << "Animal 1: ";
+    ani1.display();
+
+    std::cout << "Animal 2: ";
+    ani2.display();
+
+    // modify the name of 1st animal
+    ani1 = Animal("Not horse");
+
+    // display both objects ones again
+    std::cout << "Animal 1 after modification: ";
+    ani1.display();
+
+    std::cout << "Animal 2: ";
+    ani2.display();
+
+    return 0;
+}
+
+  Animal class dynamically allocate memory for string in its constructor.
+  Destructor ensure that dynamically allocated memory is released when an object is destroyed.
+  Copy constructor perform copy of name.
+  And copy assignment operator handle self-assignment and perform copy.
+
+
+		    +--------------------------------+
+		    |				     |
+		    |	        /P1 of WS9/          |
+		    |				     |
+	            +--------------------------------+
+
+For this workshop, each class use the Rule of three: 
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Student:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Student class have char* name and int age members and public member functions: constructor, copy constructor, copy assignment operator, destructor, and display function.
+
+    Constructor initialize Student object with parameters.
+
+    1. Destructor virtual (~Student()) :
+       delete dynamically allocated memory for name.
+       Since I have base class Student and derived class Graduate I need to make sure that memory for name is properly released. Firstly, I did not have a virtual destructor in my base class and as the result I had object slicing, because I was deleting an object of derived class using pointer to base class without virtual destructor. 
+
+    2. Copy Constructor ( Student(const Student& other)):
+       perform a copy of name attribute.
+
+    3. Copy Assignment Operator (operator=(const Student& other )):
+       self-assignment, and perform copy.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Graduate:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Graduate class is derived from Student class and have char* m_title and char* supervisor data members and public member functions constructor, copy constructor, copy assignment operator, destructor, and display function.
+
+    Constructor initialize Graduate object.
+
+    1. Destructor (~Graduate()):
+       release dynamically allocated memory for m_title and supervisor.
+
+    2. Copy Constructor (Graduate(const Graduate& other)) :
+       perform a copy of m_title and supervisor attributes using base class copy constructor.
+
+    3. Copy Assignment Operator (operator=(const Graduate& other)) :
+       self-assignment, performs copy using base class copy assignment operator.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Main:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Objects of derived class Graduate are used through pointers to base class Student
+
+    //create array of Graduate objects 
+    Graduate* graduates[5] = {
+        new Graduate("Tim David", 30, "Short range wireless technologies", "Prof. Kim Beth"),
+        new Graduate("Eva Jobs", 50, "E-Banking and its impact on developing countries", "Prof. Steve Jobs"),
+        new Graduate("Lizzy Stone", 35, "Effects of Dams and Bridges on Flooding", "Prof. Louis Parker"),
+        new Graduate("Nile Gates", 32, "Expansion of Urban Population in Canada", "Prof. Bill Gates"),
+        new Graduate("Tony Blaire", 40, "Crypto Currency and its future", "Prof. Elon Musk")
+    };
+
+
+    //display graduates using Graduate class
+    Graduate G; //created by using constructor 
+    for (size_t i = 0; i < 5; i++) {
+        G = *graduates[i];  // Copy assignment operator called 
+        display(G);         //display function called
+    }
+
+
+    //display graduates using Student class
+    Student students[5];
+    Student S;
+    for (size_t i = 0; i < 5; i++) {
+        students[i] = *graduates[i]; //Copy assignment operator called, copy only name and age from Graduate object to the name and age of Student object.
+        S = students[i];             // Copy assignment operator called
+        display(S);                  //display function called
+        deallocate(graduates[i]);    //Destructor called
+    }
+
+
+		    +--------------------------------+
+		    |				     |
+		    |	            MS4              |
+		    |				     |
+	            +--------------------------------+
+
+In this part of project was created Perishable class. 
+This part of the project seemed to me one of the most interesting because Perishable class extends Item class and add additional functionality for handling perishable items with expiry dates and handling instructions. 
+
+This is default constructor for Perishable class. It call Item default constructor to initialize Item details and set m_handlingInstructions to nullptr: 
+
+	Perishable::Perishable() : Item(), m_handlingInstructions(nullptr) {
+	}
+
+Copy constructor copy Item information using Item copy constructor, then copy m_expiry and m_handlingInstructions members of Perishable class: 
+
+	Perishable::Perishable(const Perishable& other) : Item(other) {
+		m_expiry = other.m_expiry ;
+		if (other.m_handlingInstructions) {
+			m_handlingInstructions = new char[strlen(other.m_handlingInstructions) + 1];
+			strcpy(m_handlingInstructions, other.m_handlingInstructions) ;
+		}
+		else {
+			m_handlingInstructions = nullptr;
+		}
+	}
+
+Copy assignment operator call Item copy assignment operator, then copy m_expiry and m_handlingInstructions of Perishable class:
+
+	Perishable& Perishable::operator=(const Perishable& other) {
+		if (this != &other) {
+			Item::operator=(other); 
+			m_expiry = other.m_expiry ;
+			if (m_handlingInstructions)
+				delete[] m_handlingInstructions;
+			if (other.m_handlingInstructions) {
+				m_handlingInstructions = new char[strlen(other.m_handlingInstructions) + 1];
+				strcpy(m_handlingInstructions, other.m_handlingInstructions);
+			} else {
+				m_handlingInstructions =nullptr;
+			}
+		}
+		return *this;
+	}
+
+
+Destructor delete dynamically allocated memory for m_handlingInstructions if it is not nullptr: 
+
+	Perishable::~Perishable() {
+		if (m_handlingInstructions)
+		delete[] m_handlingInstructions;
+	}
+
+Expiry return reference to m_expiry member:
+	const Date& Perishable::expiry() const {
+		return m_expiry ;
+	}
+
+isClear call Item isClear() function which return bool value based on m_quantityOnHand (if it is non exists, thats mean that object is clear): 
+
+	bool Perishable::isClear() const {
+		return Item::isClear();	
+	}
+
+
+readSku read SKU from input stream:
+int Perishable::readSku(std::istream& istr) {
+		int skuValue;
+		std::cout << "SKU: " ;
+		while (true) {
+			istr >>skuValue;
+			if (istr.fail() || skuValue <10000 || skuValue > 39999) {
+				istr.clear();
+				istr.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
+				std::cout<< "Value out of range [10000<=val<=39999]: " ;
+			} else {
+				istr.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+				setSku(skuValue) ;
+				break;
+			}
+		}
+		return getSku();
+
+	}
+
+Save function is responsible for saving data of Perishable objects to output file stream, including data from base class Item and data for perishable items which is handling instructions and expiry date.
+
+std::ofstream& Perishable::save(std::ofstream& ofstr) const {
+		Item::save(ofstr); // call save function of base class Item
+		ofstr << '\t'; //add tab
+
+		if (m_handlingInstructions) {
+			ofstr << m_handlingInstructions ; //save instructions
+		}
+		ofstr << '\t'; //add tab
+		ofstr << std::setw(2) <<std::setfill('0') <<m_expiry.getYear() % 100; //save last two digits of year of expiry
+		ofstr <<std::setw(2)<< std::setfill('0') <<m_expiry.getMonth() ;//save month of expiry
+		ofstr << std::setw(2)<< std::setfill('0') << m_expiry.getDay();//save day of expiry
+	
+		return ofstr;
+	}
+
+
+
+
+Load function read data for Perishable object from input file stream, including details from base class Item and handling instructions and expiry date for perishable items. 
+
+std::ifstream& Perishable::load(std::ifstream& ifstr) {
+		Item::load(ifstr); //call load function of base class Item
+
+		if (m_handlingInstructions) { // check if m_handlingInstructions is not nullptr. If it is not nullptr, that mean there were previous handling instructions that need be cleared before reading new ones.
+			delete[] m_handlingInstructions;
+			m_handlingInstructions = nullptr ;
+		}
+
+		if (ifstr.fail()) { //check if there was a fail in input file stream. If yes, it set error message in m_status and returs ifstream object.
+			m_status= "Input file stream read (perishable) failed!";
+			return ifstr;
+		}
+
+		ifstr.ignore(std::numeric_limits<std::streamsize>::max(), '\t') ; //ignore characters in input file stream until next tab character.
+
+		char tempHandlingInstructions[1000]; 
+		ifstr.getline(tempHandlingInstructions, 1000, '\t'); //read handling instructions from input file stream until next tab character, and store instructions in a temporary character array tempHandlingInstructions.
+
+//if temporary handling instructions array is not empty, allocate memory for m_handlingInstructions and copy instructions into it
+		if (tempHandlingInstructions[0] !='\0' ) {
+			m_handlingInstructions = new char[strlen(tempHandlingInstructions) + 1] ;
+			strcpy(m_handlingInstructions, tempHandlingInstructions) ;
+		}
+
+		ifstr >>m_expiry; //read expiry date from input file stream
+		if (ifstr.fail()) { //if there was a fail in reading expiry date. If yes, it set error message in m_status.
+			m_status = "Input file stream read (perishable) failed!";
+		}
+		return ifstr;
+	}
+
+
+Display function output information about a Perishable item to output stream. Format depend on whether item should be displayed in linear format or with additional details.
+
+std::ostream& Perishable::display(std::ostream& os) const {
+		if (isClear() ) { //check if isClear function returns true
+			if ( Item::isLinear()) { //check if the item should be displayed in linear format
+				Item::display(os); //call display function of base class Item 
+				os << (m_handlingInstructions ? '*' : ' ') <<m_expiry ; //after print expiry date.display * if there are handling instructions, or ' ' if there are none 
+			} else { //isLinear is false, display additional details
+				os <<"Perishable "; //label for perishable item 
+				Item::display(os) ; //call display function of base class Item
+				os <<"Expiry date: " << m_expiry ; //display expiry date
+				if (m_handlingInstructions) { 
+					os << std::endl <<"Handling Instructions: "<< m_handlingInstructions;
+				} //display handling instructions if they exist
+				os <<std::endl;
+			}
+		} else {
+			os<< m_status; 
+		}
+		return os;
+	}
+
+
+
+Read function in Perishable class responsible for reading input to Perishable class from input stream. It builds on the read function inherited from class Item	
+
+	std::istream& Perishable::read(std::istream& is) {
+		Item::read(is); // call read function of Item
+
+		if (m_handlingInstructions) { // delete any existing handling instructions
+			delete[] m_handlingInstructions ;
+			m_handlingInstructions =nullptr;
+		}
+
+		std::cout << "Expiry date (YYMMDD): ";
+		is>> m_expiry;
+		is.ignore(); 
+
+		std::cout <<"Handling Instructions, ENTER to skip: " ;
+		char temp[1000];
+		is.peek();
+
+		if (is && is.peek() !='\n') { //check if next character is newline
+			is.getline(temp, 1000, '\n' ); //read handling instructions and allocate memory for it
+			m_handlingInstructions = new char[ strlen(temp) + 1 ];
+			strcpy(m_handlingInstructions, temp ) ;
+		}
+		if (is.fail()) { //fail in reading
+			m_status = "Perishable console date entry failed!";
+		}
+		return is;
+	}
+
+
