@@ -1,0 +1,273 @@
+/*
+*****************************************************************************
+                          OOP244 Workshop - #4 REFLECTION (P2)
+Full Name  : Anna Sychikova
+Student ID#: 159363217
+Email      : asychikova@myseneca.ca
+Section    : NCC
+Date       : 2023.10.08
+*****************************************************************************
+*/
+
+This week, special attention was paid to such concepts as default and overloaded constructors,
+destructors, initializing of class member variables and releasing of member pointers.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		     Default and Overloaded Constructors:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Constructors are automatically called when an object is created. 
+Default constructors are constructors that do not take any parameters and initializing objects when no values are provided. 
+
+Label Class in Label.h and Label.cpp:
+
+//default constructor initialize m_frame with a default pattern and sets m_content to 
+//nullptr. This constructor used when Label objects creating without providing 
+//frame or content.
+
+
+Label::Label() : m_content(nullptr) {
+    strcpy ( m_frame, "+-+|+-+|" );
+}
+
+Overloaded constructors are constructors that take one or more parameters: 
+
+Label::Label(const char* frameArg) : m_content(nullptr) {
+    if (frameArg)
+        strcpy( m_frame, frameArg);
+    else
+        strcpy(m_frame, "+-+|+-+|" );
+}
+//constructor that takes frameArg and sets m_content to nullptr
+
+Label::Label(const char* frameArg, const char* content) : m_content(nullptr) {}
+
+//constructor that takes 2 parameters: frameArg and content and sets m_content to nullptr
+
+
+LabelMaker Class in LabelMaker.h and LabelMaker.cpp:
+
+LabelMaker::LabelMaker(int noOfLabels) : m_labels(new Label[noOfLabels]), m_noOfLabels(noOfLabels) {}
+
+//this constructor is overloaded with one parameter which is noOfLabels. m_labels(new Label[noOfLabels]) allows LabelMaker object to have dynamically allocated array of Label objects, its size is = noOfLabels, m_noOfLabels(noOfLabels) initializes the m_noOfLabels member variable with the value of noOfLabels
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		Initializing Class Member Variables:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Label class in Label.h:
+
+class Label {
+
+
+
+    char* m_content; //member variable is a pointer to a character array
+    char m_frame[9]; //member variable is a fixed-size character array of size 9, frame for label
+
+
+
+public:
+    Label(); //def constructor 
+    Label( const char* frameArg); //overloaded constructor  
+    Label( const char* frameArg, const char* content); //overloaded constructor 
+    ~Label(); //destructor 
+    
+    std::istream& readLabel(); //member function 
+    std::ostream& printLabel() const; //member function 
+    Label& text(const char* content ); //member function 
+};
+
+
+
+LabelMaker class in LabelMaker.h:
+
+class LabelMaker {
+
+
+
+    Label* m_labels; //member variable is a pointer to array of Label objects
+    int m_noOfLabels; //member variable represents number of labels
+
+
+
+public:
+    LabelMaker(int noOfLabels); //constructor 
+    ~LabelMaker(); //destructor 
+    
+     void readLabels(); //member func
+     void printLabels() const; //member func
+};
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+			   Release Member Pointers:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When objects of the Label class was created, and memory was dynamically allocated for m_content it is important to deallocate memory. Destructor ~Label() is used to deallocate memory used by m_content array. This prevents memory leaks and ensures that allocated memory is properly released.
+
+Label.cpp:
+
+Label::~Label() {
+    delete[] m_content;
+}
+
+LabelMaker class have member m_labels that is pointer to dynamically allocated Label objects. Similar to Label class, destructor ~LabelMaker() is responsible for deallocating memory occupied by dynamically allocated array. When an instance of LabelMaker is destroyed, its destructor is automatically called, releasing the memory occupied by m_labels array. 
+
+LabelMaker.cpp:
+
+LabelMaker::~LabelMaker() {
+    delete[] m_labels;
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+			    How the code works:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+MAIN:
+
+
+   Label theProgram("/-\\|/-\\|"); // creates Label with frame "/-\\|/-\\|" using 1 arg constructor, no content provided
+   Label test1; // creates Label with default frame ("+-+|+-+|") using default constructor and no content
+   Label test2("ABCDEFGH"); // Creates a Label with frame "ABCDEFGH"  using 1 arg constructor and no content
+
+   test1.printLabel(); // do not print since there is no m_content. printLabel checks for m_content 
+   test2.printLabel(); // do not print since there is no m_content. printLabel checks for m_content 
+   theProgram.printLabel(); // do not print since there is no m_content. printLabel checks for m_content 
+
+   // Modify and Print Labels
+   test1.text("Testing one, two, three"); // member function text() modify content of test1 object
+   test1.printLabel(); // prints modified test1
+   theProgram.text("Professor's Label Maker Program Tester"); // member function text() modify content of theProgram object
+   theProgram.printLabel(); // prints modified theProgram
+   cout << endl;
+
+   // user inputs data for number of labels 
+   cout << "Number of labels to create: ";
+   cin >> noOfLabels;
+   cin.ignore(10000, '\n');
+
+   // Create LabelMaker and set Labels
+   LabelMaker lblMkr(noOfLabels); // Creates a LabelMaker object lblMkr with number of labels
+   lblMkr.readLabels(); // asks for label texts and sets them for each label
+
+   // Print Labels from LabelMaker
+   lblMkr.printLabels(); // Prints the labels stored in lblMkr calling printLabels
+
+   return 0;
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+LABEL:
+
+
+READLABEL:
+
+std::istream& Label::readLabel() {
+    char input[100]; //character array input of size 100
+    cin.getline(input, 100 ); // read user input
+    char* trimmedText = input; //character pointer trimmedText, initialized to point to beginning of the input array
+    
+    text( trimmedText);//calls text function which is responsible for setting the content of Label object
+    return cin; //returning input stream object
+}
+
+
+
+PRINTLABEL:
+
+std::ostream& Label::printLabel() const {
+    if (m_content) { //if there is no content, nothing will be printed
+        int len =strlen( m_content); //get length of content using strlen
+        int width =len > 23 ? len : 23; // width based on content length or a minimum width of 23 characters if less than 23 will be set to 23
+        int padding = ( width - len ) / 2; // padding for centering text
+
+
+Top Line: 
+
+				+ - + | + - + | 
+				0 1 2 3 4 5 6 7
+
+				/ - \\ | / - \\ | 
+				0 1  2 3 4 5  6 7 
+
+
+        cout << m_frame[0]; //print first character of the frame which is + for all cases (+-+|+-+|) and / for theProgram since m_frame for theProgram is /-\\|/-\\| ("\\" is backslash \)
+        for (int i = 0; i < width + 2; ++i)  
+        cout << m_frame[1]; //print the middle characters of top frame line 
+        cout << m_frame[2] << '\n'; //print the last character of top frame line
+
+Spaces for the Second Line:    
+        cout << m_frame[7]; // print the first character of the second line of frame
+        for (int i = 0; i < width + 2; ++i) 
+        cout << ' ';
+        cout << m_frame[3] <<'\n'; // print last character of the second line frame and move to the next line
+
+Content Line:        
+        cout << m_frame[7] << ' '; //print first character of content line with a space
+        for (int i = 0; i < padding; ++i)
+        cout << ' '; //center text within the label
+       cout << std::right << std::setw(len ) << m_content; //print content with right alignment and width
+        for (int i = 0; i < padding + (width - len - 2) % 2; ++i) //for spaces
+        cout << ' '; //prints spaces
+        cout << ' ' << m_frame[3] << '\n'; //print space and the last character of content line and move to the next line
+
+Spaces for the Line after Content:         
+        cout << m_frame[7]; //print first character 
+        for (int i = 0; i < width + 2; ++i)
+        cout << ' ';
+        cout << m_frame[3] << '\n'; //print last character 
+
+Bottom Line:
+        cout << m_frame[6];//print first character of bottom frame
+        for (int i = 0; i < width + 2; ++i)
+        cout << m_frame[5]; //line for bottom frame
+        cout << m_frame[4] ; //prints the 4th character of the array m_frame which is last character of bottom line and move to the next line 
+       
+    }
+    return cout;
+}
+
+
+
+TEXT: 
+ 
+    Label& Label::text(const char* content) { //definition of member function text, takes pointer to constant string as input 
+        delete[] m_content; //delete previously allocated memory for m_content
+        int len = strlen(content); //calculates length of input content using strlen
+        if (len > 70) len = 70; //checks length of string and if it is greater then 70, set length to 70
+        m_content = new char[len + 1]; //allocates memory for m_content array with size of len + 1 for null terminator 
+        for (int i = 0; i < len; ++i) { //copy characters from content to m_content
+        m_content[i] = content[i];
+    }
+        m_content[len] = '\0'; //adds null terminator to the end of m_content
+        return *this; //reference to the current state of Level object 
+
+	}
+
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+LABELMAKER:
+
+
+READLABELS:
+
+    void LabelMaker::readLabels() {
+        char temp[100]; //character array temp of size 100
+std::cout << "Enter 6 labels:" << std::endl;  
+        for (int i = 0; i < m_noOfLabels; ++i) { 
+
+            cout << "Enter label number " << i + 1 << std::endl;
+            cout << "> "; //enters text of label
+            cin.getline(temp, 100); //reads user input and store it in temp(just 100 characters) array
+            m_labels[i].text(temp); //calls text function of Label class, temp for each Label object of LabelMaker is set 
+        }
+    }
+
+
+PRINTLABELS:
+
+    void LabelMaker::printLabels() const {
+        for (int i = 0; i < m_noOfLabels; ++i) { //loop through the number of labels
+            m_labels[i].printLabel(); //call printLabel for the each object of Label class
+             cout << std::endl; 
+        }
+    }
