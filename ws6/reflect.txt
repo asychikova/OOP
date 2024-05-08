@@ -1,0 +1,523 @@
+/*
+*****************************************************************************
+            OOP244 Workshop - #6 REFLECTION (P1 of WS6 and MS1)
+Full Name  : Anna Sychikova
+Student ID#: 159363217
+Email      : asychikova@myseneca.ca
+Section    : NCC
+Date       : 2023.11.03
+*****************************************************************************
+*/
+
+ This week, special attention was paid to such concepts as overloaded constructors and overloaded IO operators.
+
+->Overloaded constructors - multiple constructors within a class, each with different set of parameters. Each of this constructors provide different way to initialize objects of a class. During creation of object of a class, constructor called based on the provided arguments.
+
+For example:
+public class Chocolate {
+    private int code;
+    private std::string name;
+
+    // Default constructor with no parameters
+    public MyClass() {
+        this.code = 0;
+        this.name = "NO NAME";
+    }
+
+    // Constructor with one parameter
+    public MyClass(int code) {
+        this.code = number;
+        this.name = "Twix";
+    }
+
+    // Constructor with two parameters
+    public MyClass(int code, String name) {
+        this.code = code;
+        this.name = name;
+    }
+
+}
+
+
+Chocolate prod1 = new Chocolate();                // default constructor              
+Chocolate prod2 = new Chocolate(5535);           // constructor with one parameter    
+Chocolate prod3 = new Chocolate(4535, "KitKat");// constructor with two parameters    
+
+ prod1 (0, NO NAME)
+ prod2 (5535, Twix)
+ prod3 (4535, KitKat)
+
+
+->Overloaded IO operators - custom implementations of input and output operators for a class. These operators allow to define how objects of the class should be read from and written to streams, such as std::cin, std::cout, and files.
+
+For example:
+
+#include <iostream>
+#include <string>
+
+class Chocolate {
+private:
+    int code;
+    std::string text;
+
+public:
+    Chocolate() : code(0), name("NO NAME") {}
+
+    // Overloading the input operator (>>) 
+    friend std::istream& operator>> (std::istream& input,Chocolate& chlt ) {
+        input >> chlt.code >>chlt.name;
+        return input;
+    }
+
+    // Overloading the output operator (<<) 
+    friend std::ostream& operator<< (std::ostream& output,const Chocolate& chlt ) {
+        output <<"Code: " <<chlt.code << ", Name: "<< chlt.name;
+        return output;
+    }
+};
+
+int main() {
+    Chocolate chtl;
+
+    std::cout << "Enter chocolate code and name: ";
+    std::cin >> chlt; // use overloaded input operator
+
+    std::cout << "Chocolate info: " << chlt << std::endl; // use overloaded output operator
+    return 0;
+}
+
+
+In order to write data to the file: 
+
+#include <iostream>
+#include <fstream>
+#include <string>
+
+class Chocolate {
+private:
+    int code;
+    std::string name;
+
+public:
+    Chocolate() : code(0), name("NO NAME") {}
+
+    // Overloading the input operator (>>)
+    friend std::istream& operator>> (std::istream& input, Chocolate& chlt ) {
+        input >> chlt.code >> chlt.name;
+        return input;
+    }
+
+    // Overloading the output operator (<<)
+    friend std::ostream& operator<< (std::ostream& output, const Chocolate& chlt ) {
+        output << "Code: "<< chlt.code <<", Name: "<<chlt.name;
+        return output;
+    }
+};
+
+int main() {
+    Chocolate chlt;
+
+    std::cout << "Enter chocolate code and name: ";
+    std::cin >> chlt; // use overloaded input operator
+
+    std::cout << "Chocolate info: " << chlt << std::endl; // use overloaded output operator
+
+    // writing info of Chocolate object to file
+    std::ofstream outFile("chocolate.txt"); // output file 
+
+    if (outFile.is_open()) {
+        outFile << chlt; // write the info about object to file use overloaded output operator
+        outFile.close(); // close
+    } else {
+        std::cout << "Unable to open file." << std::endl;
+    }
+
+    return 0;
+}
+
+
+		    +--------------------------------+
+		    |				     |
+		    |	        /P1 of WS6/          |
+		    |				     |
+	            +--------------------------------+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		  	      Constructors:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Default Constructor HealthCard::HealthCard():
+This constructor creates an empty HealthCard object.
+
+  HealthCard::HealthCard() : m_name( nullptr), m_number(0) { //initializes m_name to nullptr and m_number to 0
+    }
+        m_vCode[0] = '\0' ; //set m_vCode array to empty strings
+        m_sNumber[0] = '\0' ; //set m_sNumber array to empty strings
+
+
+Parameterized Constructor HealthCard::HealthCard(const char* name, long long number, const char vCode[], const char sNumber[]):
+
+   HealthCard::HealthCard( const char* name, long long number, const char vCode[], const char sNumber[]) : m_name(nullptr), m_number(0) {
+        if (validID(name, number, vCode, sNumber )) { //validate input health card information using validID 
+            allocateAndCopy(name ); //if input is valid, it allocates memory for m_name and copies input name using allocateAndCopy
+            m_number =number; //set m_number
+            strncpy( m_vCode, vCode, 3); //set m_vCode 
+            m_vCode[2] = '\0';
+            strncpy( m_sNumber, sNumber, 10); //set m_sNumber
+            m_sNumber[9] = '\0' ;
+        } else {
+            setEmpty() ; //if input is not valid, sets object to empty state using the setEmpty
+        }
+    }
+
+
+Copy Constructor HealthCard::HealthCard(const HealthCard& hc):
+Do a copy of the passed HealthCard object hc to create a new object.
+
+   HealthCard::HealthCard( const HealthCard& hc) : m_name(nullptr), m_number(0) {
+        *this = hc ; 
+    }
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		  	   Overloaded operators: 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Overloaded output operator to print a HealthCard object to the output stream:
+
+   std::ostream& operator<<( std::ostream& ostr, const HealthCard& hc) {
+        return hc.print( ostr, false); //call print member function with toFile set to false.
+    }
+       
+        
+Overloaded input operator to read a HealthCard object from the input stream:
+    std::istream& operator>>( std::istream& istr, HealthCard& hc) {
+        return hc.read(istr ) ;  //call read member function.
+    }
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		  	       Functions: 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  validID Function:
+    Checks if name is valid, number, vCode, sNumber and returns true if they are valid.
+
+  setEmpty Function:
+    Deallocate memory allocated for the name and set member variables to default/empty values.
+
+  allocateAndCopy Function:
+    Allocates memory for name and copy provided name into newly allocated memory.
+
+  extractChar Function:
+    Reads characters from input stream until a ch is detected. If the character is not found, it sets the failbit in the input stream.
+
+   std::istream& HealthCard::extractChar(std::istream& istr, char ch ) const {
+        char next; 
+        istr >> std::ws; // uses the >> operator to skip any leading whitespace characters
+        next = istr.peek() ; //read next character from the input stream without extracting, character will be stored in next variable
+        if ( next == ch) { //if next character matches ch
+            istr.ignore() ; //ignore function is called to extract matched character from input stream.
+        } else {
+            istr.ignore( 1000, ch); //next character does not match ch, ignore function is called with maximum number of characters 1000 to skip until the character ch is found and extracted from input stream.
+            istr.setstate(std::ios::failbit); //setstate function set the failbit flag of the input stream's state, failure in input 
+        }
+        return istr ;
+    }
+
+  printIDInfo Function:
+    Print formatted information of HealthCard object to the output stream. If the name is not null, it calculates number of dots for formatting and prints ID info
+
+  printIDInfoFile Function:
+    Print ID information to a file stream (ostr) 
+    std::ostream& HealthCard::printIDInfoFile( std::ostream& ostr) const {
+        ostr << m_name<< ","<< m_number << "-"<<m_vCode << ", "<< m_sNumber;
+        return ostr;
+    }
+
+  print Function:
+    Print information to the output stream (ostr). 
+
+   std::ostream& HealthCard::print(std::ostream& ostr, bool toFile) const {
+            if ( toFile) { //if toFile is true
+                if (*this) {
+                    printIDInfoFile(ostr)<< std::endl; // print information formatted for a file
+                } 
+            } else { //if toFile is false
+                if (*this ) {
+                    printIDInfo(ostr); //print formatted information for the console
+                } else {
+                    ostr << "Invalid Health Card Record" ; //if object is empty, it prints an error message.
+
+                }
+            }
+            return ostr;
+        } 
+
+
+  read Function:
+    Reads information from input stream (istr). It reads name, number, vCode, and sNumber using extractChar and validate the input. If valid, it allocate memory for name and copy the provided name.
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		  	       Read and Write: 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+main ReadCardFromFile Function:
+Read a HealthCard object from the input stream using the overloaded input operator.
+
+main dataEntryTest Function:
+Test input functionality by taking user input for a HealthCard object using the input operator.
+
+main noOfRecs Function:
+Calculate number of records in the given file by counting the newline characters.
+
+showFile Function:
+Displays file contents on the console.
+
+How is that works:
+    ifstream CardFile("HealthCardInfo.csv");: opens input file named "HealthCardInfo.csv" for reading.
+    ofstream goodCardFile("goodInfo.csv");: opens output file named "goodInfo.csv" for writing.
+
+    Reading Data from "HealthCardInfo.csv" and Writing to "goodInfo.csv":
+        Inside the for loop, C = ReadCardFromFile(CardFile); read a HealthCard object from input file using overloaded operator >>.
+        C.print(goodCardFile, true); writes HealthCard object to output file. The toFile parameter is set to true, so the print function prints the data.
+
+    After reading, the HealthCard object is printed to the console using cout << C << endl;.
+    If the input record is valid, it is written to the "goodInfo.csv" file using C.print(goodCardFile, true);.
+
+
+		    +--------------------------------+
+		    |				     |
+		    |	            MS1              |
+		    |				     |
+	            +--------------------------------+
+
+Entire code is enclosed within the sdds namespace, which helps in organizing and encapsulating. It consists of Date, Status and Utils modules: 
+///////////////
+DATE: 
+
+Constructors:
+
+    Date::Date() : m_year(0), m_month(0), m_day(0), m_formatted(true) {
+        sdds::ut.getSystemDate(&m_year, &m_month, &m_day) ;
+    }
+        Initialize Date object with current system date, use the Utils class to take current year, month, and day.
+        
+        Date::Date( int year, int month, int day) : m_year(year), m_month(month), m_day(day), m_formatted(true) {
+        if ( !validate() ) {
+            m_state= Status(3, "Invalid date value" );
+            m_year =0;
+            m_month = 0;
+            m_day =0 ;
+        }
+    }
+        Initialize Date object with the provided year, month, and day values. Validate input date using validate() function. If input date is invalid, sets m_state member variable with an error message.
+
+Member Functions:
+
+    bool validate():
+        Check if current date stored in m_year, m_month, m_day is valid. Validate year, month, and day values based on calendar rules (month range and leap year for 2nd month). If date is valid, clears m_state status object and return true. If date is invalid, returns false.
+
+    int uniqueDateValue() const:
+
+    m_year * 372: add total number of days in all years without leap years.
+    (m_year / 4) * 1: add one day for each leap year every 4 years.
+    (m_year / 100) * 1: remove one day for each 100th year (unless it's also divisible by 400, making it a leap year).
+    (m_year / 400) * 1: add one day every 400 years 
+
+   Loop iterate through months from January (i = 1) to month before the current month (m_month - 1). For each month, add number of days in that month to days variable using ut.daysOfMon(i, m_year) function.
+
+Finally, it add current day of month (m_day) to days variable.
+
+  Calculated days variable now holds unique integer value with date. Function returns this date value.
+
+
+    std::istream& read(std::istream& is):
+	Reading function in date module was difficult to create because it handles various input formats, ensuring correct parsing of input string into components of year, month and day. 
+Function should analyze input string, which can be in different formats, such as non-integer, "YYYYMMDD", "YYMMDD" or "MMDD". Function must also handle various types of errors, including invalid 		  characters, invalid values of year, month or day, and empty input. If errors occur, function should set error states and std::ios::failbit of input stream.
+
+	Since function contains nested conditional statements (if and else if blocks) to determine input format, I had a lot of problems with logic in blocks and as a result, several read functions were formed that did not work as required. As a result, I managed to combine parts of these functions and make correct version of read().
+Special cases, such as processing leap years and converting 2-digit years to 4-digit years, complicate function. For example, adding 2000 to two-digit years less than 20 ensures correct conversion to 4-digit years in 21st century. Function also interacts with other parts of code, such as validation function, Status class and Utils module. 
+
+	In addition, function should check analyzed values of year, month and day to make sure that they form a valid date. This involves taking into account leap years, acceptable ranges of months (from 1 to 12) and acceptable ranges of days depending on month and year.
+
+How it works: 
+
+        Read date from input stream, parse input string to extract year, month, and day information, validate parsed date using validate() function. If input date is valid, update the m_year, m_month, m_day member variables and clears the m_state. If input date is invalid, sets m_state with an error message and sets std::ios::failbit flag for the input stream which means that most recent operation on stream was failed.
+
+    std::istream& Date::read( std::istream& is ) {
+        std::string input;
+        is >> input ; //read string input from provided input stream is
+
+//iterates through each character of input string. If a character is not a digit, isInvalidInput is set to true. It constructs an integer dateValue by converting characters to integer
+        bool isInvalidInput = false ;
+        int dateValue = 0;
+        for (size_t i = 0;i < input.length(); ++i) {
+            if (!isdigit(input[i])) {
+                isInvalidInput = true ;
+                break;
+            }
+            dateValue =dateValue * 10 +(input[i] - '0'); //converting to integer value
+        }
+
+
+//if isInvalidInput is true (indicating non-digit characters) or if input is empty, function sets m_state to indicate invalid date value, sets std::ios::failbit of input stream, and returns modified input stream to signal failure.
+        if (isInvalidInput || input.empty()) {
+            m_state = Status( "Invalid date value" );
+            is.setstate(std::ios::failbit );
+            return is;
+        }
+
+        int year, month, day;
+
+//if dateValue is greater than or equal to 1000000, it mean the input format is "YYYYMMDD". In this case, code calculates year by dividing dateValue by 10000 removing month and day parts, calculates month by taking  remainder after dividing by 10000 and then dividing by 100 removing year and day parts, and calculates the day by taking the remainder after dividing by 100 keep only day part:
+        if (dateValue>= 1000000) {
+            year = dateValue / 10000 ;
+            month =(dateValue / 100) % 100;
+            day= dateValue % 100;
+//if dateValue between 10000 and 999999, it means input format is "YYMMDD". Code calculate the year, month, and day in a similar way as previous case but also check if the parsed year is less than 15. If it is, it sets error state indicating invalid year and sets the std::ios::failbit of the input stream. Additionally, if parsed year less than 20, it adds 2000 to the year to convert it into a 4-digit year:
+        } else if (dateValue>= 10000) {
+            year =dateValue / 10000;
+            month= (dateValue / 100) % 100;
+            day = dateValue % 100;
+            if (year < 15 ) {
+                m_state =Status(1, "Invalid year in date");
+                is.setstate(std::ios::failbit);
+                return is;
+            }
+            year +=(year < 20 ? 0 : 2000);
+//if dateValue between 100 and 9999, it means input format is "MMDD". In this case, code sets year to a test year (sdds_testYear), calculates month and day.
+        } else if ( dateValue >= 100) {
+            year= sdds_testYear;
+            month= dateValue / 100;
+            day= dateValue % 100;
+        } else {
+//check if the parsed year, month, and day form a valid date
+            m_state =Status(2, "Invalid month in date");
+            is.setstate(std::ios::failbit);
+            return is;
+        }
+
+        m_year = year;
+        m_month= month;
+        m_day = day;
+//if input date is invalid, sets the m_state status object with an appropriate error message and sets std::ios::failbit flag for input stream which means that most recent operation on the stream has failed
+        if (!validate()) {
+            if (m_year< 0 || m_year >9999) {
+                m_state = Status(1, "Invalid year in date" );
+            } else if (m_month < 1 || m_month > 12) {
+                m_state = Status(2, "Invalid month in date" );
+            } else {
+            m_state = Status(3, "Invalid day in date" );
+            }
+            is.setstate(std::ios::failbit);
+        } else {
+            m_state.clear();
+        }
+
+        return is;
+    }
+
+
+    std::ostream& write(std::ostream& os) const:
+        Write formatted or unformatted date to output stream os.
+        Format date as either "YYYY/MM/DD" or "YYMMDD" based on m_formatted member variable.
+        Returns output stream.
+
+Comparison Operators:
+
+    bool operator==(const Date& D) const:
+        compare two Date objects based on their unique integer date values.
+
+    bool operator!=(const Date& D) const:
+        compare two Date objects based on their unique integer date values.
+
+    bool operator<(const Date& D) const:
+        check if the current Date object is less than provided Date object based on unique integer date values.
+
+    bool operator>(const Date& D) const:
+        check if the current Date object is greater than provided Date object based on unique integer date values.
+
+    bool operator<=(const Date& D) const:
+        check if current Date object is less than or equal to provided Date object based on unique integer date values.
+
+    bool operator>=(const Date& D) const:
+        check if current Date object is greater than or equal to provided Date object based on unique integer date values.
+
+Assignment Operator:
+
+    Date& operator=(const Date& D):
+        assign Date object's member variables and m_state status object based on another Date object.
+        self-assignment protection, and return modified Date object.
+
+///////////////
+Status: 
+
+Constructors:
+
+    Status():
+        Default constructor that initializes m_description pointer to nullptr and m_code to 0.
+
+    Status(const char* description):
+        Constructor that takes a C-string description as a parameter.
+        Initializes m_code to 0 and sets m_description pointer to a dynamically allocated copy of input description.
+
+    Status(int code, const char* description):
+        Constructor that takes an integer code and a C-string description as parameters. Initialize m_code with the provided code and sets the m_description pointer to a dynamically allocated copy of input description.
+
+    Status(const Status& other):
+        Copy constructor that creates a new Status object by copying description and code from another Status object.
+
+Assignment Operators:
+
+    Status& operator=(const Status& other):
+        Assignment operator that copy the description and code from another Status object to current object. Complete self-assignment protection and return the modified Status object.
+
+    Status& operator=(int code):
+        Assign integer code to the Status object, set m_description and m_code based on input code (error messages for specific codes).
+        Return the modified Status object.
+
+    Status& operator=(const char* description):
+        Assign description to Status object, set m_description and m_code based on input description.
+        Return modified Status object.
+
+Conversion Operators:
+
+    operator int() const:
+        Convert Status object to an integer, return m_code member variable.
+
+    operator const char*() const:
+        Convert Status object to a C-string, return m_description pointer or an empty string if m_description is nullptr.
+
+    operator bool() const:
+        Convert Status object to a boolean value.
+        Return true if m_code is 0 and m_description is nullptr, indicating no errors, false otherwise.
+
+Destructor:
+
+    ~Status():
+       Call clear() that deallocates dynamically allocated memory for m_description.
+
+Friend Function:
+
+    friend std::ostream& operator<<(std::ostream& os, const Status& status):
+        Overloaded << operator allow print Status objects to output stream.
+        Print status description and code to output stream, handling different cases (no description, no code, both here).
+
+///////////////
+Utils: 
+
+ Member Functions:
+
+    void getSystemDate(int* year, int* mon, int* day):
+        Take pointers to integers as parameters (year, mon, and day).
+        Retrieve current system date and stores the year, month, and day values.
+        if program in test mode, it use predefined test date values.
+
+    int daysOfMon(int mon, int year):
+        Take integers mon (month) and year as parameters.
+        Calculate and returns the number of days in specified month of the given year, handling leap years.
+
+    void testMode(bool testmode = true):
+        Take a boolean parameter testmode (default is true).
+        Set test mode of the Utils class to provided value.
+        When in test mode, getSystemDate function return predefined test date values
