@@ -12,10 +12,8 @@ Date       : 2023.11.26
 
 
    	    +--------------------------------+
-		    |				                         |
-		    |	           PROJECT             |
-		    |				                         |
-	      +--------------------------------+
+			PROJECT
+	    +--------------------------------+
 
 
 Entire code is encapsulated within sdds namespace, providing a structured and organized framework. Application have 8 classes, each of them performs the necessary functionality for the program. Status class play a crucial role in maintaining state of an object, holding description of state. Date class encapsulates year, month, and day values, contributing to efficient date-related functionalities.
