@@ -1,0 +1,388 @@
+/*
+*****************************************************************************
+            OOP244 Workshop - #7 REFLECTION (P1 of WS7 and MS2)
+Full Name  : Anna Sychikova
+Student ID#: 159363217
+Email      : asychikova@myseneca.ca
+Section    : NCC
+Date       : 2023.11.10
+*****************************************************************************
+*/
+
+ This week, special attention was paid to such concept as hierarchical structure.
+
+->Inheritance of derived class from base class: 
+
+Example: 
+#include <iostream>
+#include <string>
+
+class Animal {
+protected:
+    std::string name ;
+    int age;
+
+public:
+    Animal( const std::string& n, int a ) : name( n), age(a) {}
+
+    virtual void makeSound() const {
+        std::cout <<"Animal makes sound." <<std::endl;
+    }
+
+    void displayInfo() const {
+        std::cout<< "Name: "<<name<< ", Age: "<<age <<" years"<< std::endl ; 
+    }
+};
+
+class Dog : public Animal {
+private:
+    std::string breed ;
+
+public:
+    Dog( const std::string& n, int a, const std::string& b )
+        : Animal(n, a ), breed(b ) {}
+
+    void makeSound() const override {
+        std::cout<< "Dog barks: Wof! Wof!"<<std::endl ;
+    }
+
+    void displayInfo() const {
+        Animal::displayInfo() ;  //call displayInfo function in base class Animal
+        std::cout<< "Breed: "<< breed <<std::endl;
+    }
+};
+
+class Cat : public Animal {
+private:
+    bool isIndoor ;
+
+public:
+    Cat( const std::string& n , int a, bool indoor )
+        : Animal(n, a ), isIndoor(indoor ) {}
+
+    void makeSound() const override {
+        std::cout<< "Cat meows: Meow! Meow!"<< std::endl ;
+    }
+
+    void displayInfo() const {
+        Animal::displayInfo() ;  //call displayInfo function in base class Animal
+        std::cout <<"Indoor: " <<(isIndoor ? "Yes" : "No")<< std::endl ;
+    }
+};
+
+int main() {
+    Animal genericAnimal("Generic Animal", 5) ;
+    genericAnimal.displayInfo();
+    genericAnimal.makeSound() ;
+
+    std::cout << "\n"; 
+
+    Dog aDog( "Igor", 3, "Golden Retriever" );
+    aDog.displayInfo(); 
+    aDog.makeSound(); 
+
+    std::cout << "\n" ;
+
+    Cat bCat("Valera", 2,  true );
+    bCat.displayInfo();
+    bCat.makeSound() ; 
+
+    return 0;
+}
+
+
+Output: 
+
+Name: Generic Animal, Age: 5 years
+Animal makes a generic sound.
+
+Name: Igor, Age: 3 years
+Breed: Golden Retriever
+Dog barks: Wof! Wof!
+
+Name: Valera, Age: 2 years
+Indoor: Yes
+Cat meows: Meow! Meow!
+
+
+Explanation:
+  Animal class is base class with protected members name and age, and virtual functions makeSound and displayInfo. Dog class is derived from Animal and add private member breed. It override makeSound function and providd a dog-specific sound. Cat class also derived from Animal and add private member isIndoor. It override makeSound function to provide a cat-specific sound.
+
+
+		    +--------------------------------+
+		    |				     |
+		    |	        /P1 of WS7/          |
+		    |				     |
+	            +--------------------------------+
+
+  Container class represent container with a specified content, capacity, and content volume. Pack class derived from Container class and represents a specific type of container, a pack, which has a unit size and number of units. It overrides the print and read methods, provide pack-specific functionality, such as print number of units in pack and read user input to add content to pack.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		  	      Container:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Container::Container( const char* content, int capacity, int contentVolume ) {
+        if ( content && content[0]!= '\0' && capacity >0 && contentVolume >=0 && contentVolume<= capacity) {
+            strncpy( m_content, content, 50);
+            m_content[50] ='\0';
+            m_capacity =capacity ;
+            m_contentVolume= contentVolume;
+        } else {
+            setEmpty();
+        }
+    }
+        This is constructor for Container class. It initialize object with content, capacity, and content volume. If provided arguments are non-null content, positive capacity, valid content volume it set member variables. In other case if they are not valid it calls the setEmpty() to set container to empty state.
+
+Container::operator bool() const: check if container is valid (not empty). Returns true if container is valid (non-empty content, non-negative content volume, content less than capacity) and false if empty content, negative content volume or if content volume more than capacity.
+
+Container::getCapacityToAdd(int value) const: return available capacity for adding content. It calculates available space subtracting current content volume from capacity and add given value.
+
+Container::getCapacityToRemove(int value) const: return capacity available for removing content. It calculates remaining content volume by subtracting given value from the current content volume.
+
+Container::getContentVolume() const: return current content volume of container.
+
+Container::setContentVolume(int value): set content volume of the container to given value.
+
+Container::contentVolume() const: return content volume of container.
+
+Container::getCapacity() const: return capacity of container.
+
+int Container::operator+=(int value): this operator responsible for adding content to container.
+Check if container is valid (isValid()). If not, it return 0. If container is valid, it calculates the available space (spaceAvailable) by subtracting current content volume (m_contentVolume) from the total capacity (m_capacity). It then determines actual amount to add (amountToAdd). If value is less than or equal to available space, it add value, otherwise, it add entire available space. Content volume (m_contentVolume) is then updated by adding amountToAdd, and function return actual amount that was added.
+
+int Container::operator-=(int value): this operator is responsible for removing content from container. It first check container is valid (isValid()). If not - return 0. If container is valid, it calculate actual amount to remove (amountToRemove). If value is less than or equal to current content volume (m_contentVolume), it remove value, in other case it remove entire content volume.
+Content volume (m_contentVolume) then updated by subtracting amountToRemove, and function return actual amount that was removed.
+
+Container::print(std::ostream& os) const: output container's information to the provided output stream. If container is valid, it prints the content, content volume, and capacity. Otherwise, it print message.
+
+Container::isValid() const: check if container is valid (non-empty content, non-negative content volume, content volume within capacity).
+
+Container::setEmpty(): set container to empty state by reset content, capacity, and content volume.
+
+Container::clear(int capacity, const char content): clear container and set it with provided content and capacity. If arguments are valid, it set content and capacity, reset content volume. In other case, it set container to empty state.
+
+Container::read(std::istream& is): read user input to add content to container.If container is not valid, it print error message. Prompt user for input and validate entered integer. Add minimum of entered value and available space to content volume:
+
+ if ( !isValid() ) {
+            std::cout<< "Broken Container, adding aborted! Press <ENTER> to continue....";
+            char ch;
+            while(is.get(ch) && ch != '\n' );
+            return is ;
+        }
+this part check if Container object is valid. If it's not valid, it display error message and clear input stream until end of the line. Return input stream.
+
+
+ std::cout << "Add to "<< m_content<< ": (" <<m_contentVolume<< "cc/"<< m_capacity<<")" << std::endl <<"> " ;
+prompts for input, display current state of container.
+
+
+int value;
+
+        while (!( is >>value) || is.get() != '\n' || value< 1 ) {
+            is.clear(); 
+            std::cout<< "Invalid input. Please enter a valid positive integer: " ;
+            while (is.get() !='\n') ;
+            std::cout <<"> ";
+        }
+        
+read integer value from input stream. If input is not integer, if next character is not a newline, or if value less than 1, clear input stream, discard invalid input until the end of the line, and prompt user to enter a valid positive integer. 
+
+        int actualAdded;
+        if (value < 1 ) {
+            actualAdded = 1;
+        } else if (value> m_capacity - m_contentVolume ) {
+            actualAdded =m_capacity - m_contentVolume;
+        } else {
+            actualAdded = value ;
+        }
+calculates actual amount to add based on user input, check if amount is more than 1 and do not exceed remaining capacity of container.
+
+    *this += actualAdded;
+        std::cout << "Added "<< actualAdded <<" CCs" <<std::endl;
+        return is;
+add calculated amount to container, display message indicating amount added, and return input.
+
+
+Container::operator<<(std::ostream& os, const Container& container): overload output stream operator << to print container information.
+
+Container::operator>>(std::istream& is, Container& container): overload input stream operator >> to read user input to container.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		  	         Pack:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Pack::Pack(const char* content, int size, int unitSize, int numberOfUnits)
+        : Container( content, size * unitSize, numberOfUnits * unitSize), m_unitSize( unitSize) {
+        if (m_unitSize <=0) {
+            setEmpty();
+        }
+    }: initialize Pack object with provided content, size (capacity), unit size (default 330), and number of units (default 0). Call base class (Container) constructor to set size and content volume based on unit size and number of units.
+
+Pack::operator+=(int units): add number of units to the pack. Calculates the available units and adds the minimum of the requested units and available units. Call Container class operator+= to handle addition of content.
+
+Pack::operator-=(int units): remove specified number of units from pack. Calculate removed units and remove minimum of requested units and current units. call base class operator-= to handle remove of content.
+
+Pack::unit() const: returns the unit size of the pack.
+
+Pack::noOfUnits() const: return current number of units in pack.
+
+Pack::size() const: return size of pack (units).
+
+Pack::clear(int size, int unitSize, const char content): clear pack and set it with size, unit size, and content. Call the Container class clear to set size and content.
+
+Pack::print(std::ostream& os) const: output the pack information, call Content print: content, content volume, capacity, number of units, and size. 
+
+
+Pack::read(std::istream& is): read user input in order to add units to pack. Validate input and adds units to pack. 
+
+if (!isValid() ) {
+            std::cout <<"Broken Container, adding aborted! Press <ENTER> to continue...." ;
+            char ch;
+            while ( is.get(ch) && ch !='\n');
+If Pack is not valid (using the isValid()), it means there is something wrong with container. Error message displayed, discard remaining input on line. 
+
+
+} else if (noOfUnits() < size() ) {
+            std::cout <<"Add to " ;
+            std::cout<< *this <<std::endl;
+            std::cout<<"> " ;
+            int units;
+            is >>units;
+If number of units (noOfUnits()) is less than total size of pack (size()), it means there is space to add more units. Displays information about pack (*this) and prompts user for input.
+
+while (is.fail() || units <1 || units>size() - noOfUnits() ) {
+                if ( is.fail()) {
+                    is.clear() ;
+                    while (is.get() !='\n'); 
+                    std::cout<< "Invalid Integer, retry: ";
+                } else {
+                    std::cout<<"Value out of range [1<=val<="<< size() - noOfUnits()<< "]: " ;
+                }
+                is >>units ;
+            }
+Enters loop to validate input. It check if input is an integer and if it within valid range. If input is invalid, error message displayed and ask the user to retry. Clear fail state of input stream and ask user to enter a valid value.
+
+*this += units;
+When valid input is received, add specified number of units to pack using +=.
+
+std::cout <<"Added "<< units<<std::endl;
+prints a message indicating the number of units added.
+
+while ( is.get() !='\n') ;
+discard remaining input on current line, ensuring input stream is ready for next input.
+
+std::cout<<"Pack is full!, press <ENTER> to continue..." ;
+            char ch;
+            while ( is.get(ch) && ch !='\n');
+if pack is full, displays a message, discards input on currect line.
+
+return is;
+return input stream
+
+
+operator<<(std::ostream& os, const Pack& pack): overloads output stream operator << to print pack information.
+
+operator>>(std::istream& is, Pack& pack): overload input stream operator >> to read user input to pack.
+
+
+
+		    +--------------------------------+
+		    |				     |
+		    |	            MS2              |
+		    |				     |
+	            +--------------------------------+
+
+In order to create user interface of the system, AidMan and Menu modules created for MS2. Status, Utils and Date modules remains unchanged for now.
+
+////////
+ AidMan 
+////////
+
+Private members include char* for filename and pointer to Menu class: 
+  	char* filename;
+        Menu* mainMenu;
+   	unsigned int menu();
+
+AidMan::AidMan(const char* filename): constructor for AidMan class. Initialize member variables and create a Menu object, if filename is not nullptr, allocate memory for filename and copy provided filename. Create dynamic Menu object (mainMenu) with !predefined! options.
+
+const char* menuOptions = "1- List Items\n2- Add Item\n3- Remove Item\n4- Update Quantity\n5- Sort\n6- Ship Items\n7- New/Open Aid Database";
+    mainMenu = new Menu( menuOptions);
+
+menuOptions is string that represent menu options. Each option is a line in the string, separated by newline character ('\n'). mainMenu = new Menu( menuOptions); dynamically allocate a new Menu object, and constructor of Menu class take menuOptions string as a parameter.
+    
+In Menu class constructor (Menu::Menu(const char* options)), provided options (menuOptions) initialize menuContent member variable. Constructor calculate number of options by counting newline characters in the options string (firstly, I had '\t\n' in order to separate options, but during submission, I realized that it gives unexpected '\t' character on the end of each option).
+
+AidMan::~AidMan(): destructor for AidMan class which delete allocated memory for filename and for dynamically allocated Menu. 
+
+unsigned int AidMan::menu(): display main menu and return the user choice. Retrieve system date using utility functions from Utils, display current date and data file information (if this information exists). Call run function of the Menu object (mainMenu) and process user choice.
+Print messages based on user choice, and return user choice as unsigned integer.
+
+void AidMan::run(): repeat call menu function(which calls the run from Menu module) until user choose to exit. Return value (user choice) is stored in choice variable in the AidMan::run() function. Print exit message when user choose exit. 
+    
+
+////////
+  Menu
+////////
+
+Menu::Menu(const char* options): constructor for Menu class. take string of menu options and initialize menuContent, count number of options based on newlines. Validate menu by check number of options and whether menuContent is nullptr.
+
+Menu::~Menu(): destructor for the Menu class. Delete allocated memory for menuContent.
+
+unsigned int Menu::run() const: display menu options and return user choice. Accept user input, validate it, and return user choice as unsigned integer.
+
+Menu::run() in more details: 
+
+  unsigned int Menu::run() const {
+	//if there are no menu options, return 0
+        if (numOptions == 0) {
+            return 0;
+        }
+
+	//store user input and choice for store numeric value of input 
+        std::string input;
+        int choice;
+
+
+	//display menu content with "Exit" option and prompt user for input.
+        while (true) {
+            std::cout<< menuContent<< std::endl;
+            std::cout<< "---------------------------------"<<std::endl;
+            std::cout <<"0- Exit" <<std::endl;
+            std::cout<< "> " ;
+
+	    //read a line of input from user
+            std::getline( std::cin, input );
+
+	    //check if input consists only of digits. If not, it prompt user to retry and return choice
+            bool isValidInput = true ;
+	    //in order to match type returned by input.length() I used size_t i = 0: 
+            for (size_t i =0; i <input.length(); ++i ) {
+		//checks if character at index i in string input is not digit
+                if (!isdigit( input[i] ) ) { 
+                std::cout << "Invalid Integer, retry: ";
+                std::getline(std::cin, input ) ;
+                choice = std::stoi(input);
+                    return static_cast<unsigned int>(choice) ;
+                }
+            }
+
+            if (isValidInput) {
+		//convert valid input to integer using "string to integer"
+                choice = std::stoi(input);
+
+		//if choice is within valid range, return choice
+                if (choice >=1 && choice<= numOptions ) {
+                    return static_cast<unsigned int>(choice) ;
+		//if choice is 0 return choice
+                } else if ( choice == 0) {
+                    return static_cast<unsigned int>(choice) ;
+                } else {
+		//if choice is out of range, it prompts user to retry and return choice
+                    std::cout<<"Value out of range [0<=val<=" <<numOptions << "]: " ;
+                    std::getline( std::cin, input);
+                    choice =std::stoi(input);
+                    return static_cast<unsigned int>(choice) ;
+                }
+            }
+        }
+    }
+
