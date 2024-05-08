@@ -24,9 +24,9 @@ iProduct serves as an interface, defining essential functionalities for an item 
 
 Extending the capabilities of Item class, Perishable class provides additional features for handling perishable items. It incorporates functionality for managing expiry dates and handling instructions, making it extension for products with limited shelf life.
 
-  	     +--------------------------------+
-		          AidMan             
-             +--------------------------------+
+   	 +--------------------------------+
+		AidMan
+   	 +--------------------------------+
 Class: 
 
     Private Members:
