@@ -1,0 +1,628 @@
+/*
+*****************************************************************************
+            OOP244 Workshop - #8 REFLECTION (P1 of WS8 and MS2)
+Full Name  : Anna Sychikova
+Student ID#: 159363217
+Email      : asychikova@myseneca.ca
+Section    : NCC
+Date       : 2023.11.16
+*****************************************************************************
+*/
+
+This week, special attention was paid to such concepts as virtual functions and abstract base classes.
+Example: 
+abstract base class Vehicle with pure virtual functions, and two derived classes, Car and Plane, both of them implementing virtual functions.
+
+#include <iostream>
+
+//Vehicle is abstract base class with two pure virtual functions start and honk:
+class Vehicle {
+	public:
+    	   virtual ~Vehicle() {}
+    	   virtual void start() const = 0 ;
+           virtual void honk() const = 0 ;
+
+    	   //function for all vehicles
+    	   void describe() const {
+           std::cout <<"Plane and Car are vehicles"<<std::endl ;
+    }
+};
+
+//Plane and Car are derived classes that inherit from Vehicle and provide their own implementations of virtual functions: 
+class Car : public Vehicle {
+public:
+    // implementation of start virtual function for a Car
+    virtual void start() const override {
+        std::cout<<"Car started"<<std::endl;
+    }
+   //implementation of honk virtual function for a Car
+    virtual void honk() const override {
+        std::cout <<"Сar has a sound that can attract the attention of road users"<< std::endl ;
+    }
+};
+
+class Plane : public Vehicle {
+public:
+    // implementation of start virtual function for Plane
+    virtual void start() const override {
+        std::cout<< "Passenger plane is wound up"<<std::endl;
+    }
+    //implementation of honk virtual function for Plane
+    virtual void honk() const override {
+        std::cout <<"Do not have this option"<< std::endl;
+    }
+};
+
+int main() {
+    // objects of Car and Bicycle was created using base class pointers Vehicle*
+    Vehicle* aCar = new Car();
+    Vehicle* aPlane = new Plane();
+
+    // call describe and virtual functions for Car object
+    aCar->describe();
+    aCar->start();
+    aCar->honk();
+    // call describe and virtual functions for Plane object
+    aPlane->describe();
+    aPlane->start();
+    aPlane->honk();
+
+    // clean up memory
+    delete aCar;
+    delete aPlane;
+
+    return 0;
+}
+
+
+		    +--------------------------------+
+		    |				     |
+		    |	        /P1 of WS8/          |
+		    |				     |
+	            +--------------------------------+
+
+Shape base class define common interface, LblShape extend it to include labels, and concrete classes Line and Rectangle. 
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Shape:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ Shape is abstract base class which serve as an interface. Here declared pure virtual functions draw and getSpecs. It is designed to represent a generic shape that can be drawn and has specifications.
+ 
+        The draw() function is responsible for drawing the shape, and getSpecs() is for getting specifications from the user.
+
+Shape::~Shape() (Destructor)
+
+cpp
+
+Shape::~Shape() {
+}
+destructor for the Shape class is empty.
+    
+std::ostream& operator<<(std::ostream& os, const Shape& shape) {
+    shape.draw(os);
+    return os;
+}
+Overloaded << operator for output call virtual draw function of Shape class. Draw function is implemented in derived classes and defines how shape should be drawn.
+
+
+std::istream& operator>>(std::istream& is, Shape& shape) {
+    shape.getSpecs(is);
+    return is;
+}
+Overloaded >> operator for input call virtual getSpecs function of the Shape class. getSpecs function implemented in derived classes.
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    LblShape:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+LblShape is abstract base class that inherits from Shape for shapes that have labels. 
+It have member m_label for label. It provide implementations for getSpecs and virtual function label. label() function provides access to the label.
+
+LblShape::LblShape() Default Constructor
+
+LblShape::LblShape() : m_label(nullptr) { } Initialize m_label to nullptr. This is default state when a LblShape object is created without label.
+
+LblShape::LblShape(const char* label) Constructor with Label
+
+LblShape::LblShape(const char* label) : m_label(nullptr) {
+    m_label = new char[strlen(label) + 1];
+    strcpy(m_label, label);
+} Initialize m_label to nullptr. Allocates memory for m_label to store a copy of provided label using new char[strlen(label) + 1]. after it copy provided label to dynamically allocated memory using strcpy.
+
+LblShape::~LblShape() Destructor
+
+LblShape::~LblShape() {
+    delete[] m_label;
+} Delete allocated memory for m_label( delete[] m_label ).
+
+const char* LblShape::label() const {
+    return m_label;
+} Return constant pointer to m_label.
+
+void LblShape::getSpecs(std::istream& in) {
+    char temp[1000];
+    in.getline(temp, 1000, ',');
+    delete[] m_label;
+    m_label = new char[strlen(temp) + 1];
+    strcpy(m_label, temp);
+} Read data from input stream in until comma (up to 999 characters/newline). Delete existing dynamically allocated memory for m_label, allocates memory for m_label based on data. After it copy data to dynamically allocated memory using strcpy.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Line:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Line is concrete class that inherit from LblShape. It represents horizontal line on screen and has a label associated with it. It provide implementation for pure virtual functions in LblShape. Line used for labelled shape, drawing a horizontal line. It has an additional member variable m_length. The draw() function print line of '=' characters of length m_length with label.
+
+Line::Line() Default Constructor
+
+Line::Line() : m_length(0) {
+} Initialize m_length to 0 
+
+Line::Line(const char* label, int length) : LblShape(label), m_length(length) {
+} Call parameterized constructor of base class LblShape to initialize m_label.
+    Initialize m_length member with provided length value.
+
+Line::~Line()Destructor
+
+void Line::getSpecs(std::istream& in) {
+    LblShape::getSpecs(in);
+    in >> m_length;
+    in.ignore(1000, '\n');
+} call getSpecs function of base class LblShape to read label information from input stream.Read an integer value for m_length from input stream .Ignore characters in the input stream until next newline character ('\n').
+
+void Line::draw(std::ostream& out) const {
+    if (m_length > 0 && label() != nullptr) {
+        out << label() << std::endl;
+        for (int i = 0; i < m_length; ++i) {
+            out << "=";
+        }
+    }
+} check if m_length is greater than 0 and if label is not nullptr. Output label followed by a newline to output stream out. Output a line of equal signs (=) to represent "drawing" of line. number of equal signs is determined by value of m_length.
+
+These functions define behavior of Line class, which is a derived class of LblShape. Class represents a line with a label and a specified length. getSpecs function reads specifications from input stream, and draw function outputs a representation of line to output stream.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Rectangle:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+  Rectangle is one more concrete class that inherits from LblShape. Represents rectangle on screen and can be labelled. It provide implementation for pure virtual functions in LblShape. It is used for labelled shape, drawing a rectangle with a label inside.
+
+        Rectangle is derived from LblShape.
+        It has additional variables m_width and m_height.
+        The draw() function prints a rectangle with the specified width, height, and label.
+
+Rectangle::Rectangle() (Default Constructor)
+
+Rectangle::Rectangle() : m_width(0), m_height(0) {
+}
+
+    Initialize m_width and m_height to 0 in list.
+
+Rectangle::Rectangle(const char* label, int width, int height) (Parameterized Constructor)
+
+cpp
+
+Rectangle::Rectangle(const char* label, int width, int height) : LblShape(label), m_width(width), m_height(height) {
+    if (m_height < 3 || m_width < (int)strlen(label) + 2) {
+        m_width = 0;
+        m_height = 0 ;
+    }
+}
+
+    Call parameterized constructor of the base class LblShape to initialize m_label.
+    Initialize m_width and m_height with the provided width and height values.
+    Checks if specified m_height is less than 3 or m_width is less than  length of  label plus 2. If true, it set m_width and m_height to 0.
+
+Rectangle::~Rectangle() (Destructor)
+
+
+Rectangle::~Rectangle() {
+}
+destructor doesn't have any specific functionality.
+
+void Rectangle::getSpecs(std::istream& in) {
+    LblShape::getSpecs(in);
+    in >> m_width ;
+    in.ignore();
+    in >> m_height;
+    in.ignore(1000, '\n');
+}
+
+    Call getSpecs function of base class LblShape to read  label information from input stream.
+    Read int values for m_width and m_height. Ignore characters in input stream up to next newline character ('\n').
+
+
+void Rectangle::draw(std::ostream& out) const {
+    if (m_width > 0 && m_height > 0 && label() != nullptr) {
+        out << "+" ;
+        for (int i = 0; i < m_width - 2; ++i) {
+            out << "-";
+        }
+        out << "+" << std::endl;
+
+        out << "|";
+        out << label();
+
+        for (int i = 0; i < m_width - (int)strlen(label()) - 2; ++i) {
+            out << " " ;
+        }
+        out << "|" << std::endl ;
+
+        for (int i = 0; i < m_height - 3; ++i) {
+            out << "|";
+            for (int j = 0; j < m_width - 2; ++j) {
+                out << " " ;
+            }
+            out << "|" << std::endl;
+        }
+        out << "+";
+        for (int i = 0; i < m_width - 2; ++i) {
+            out << "-";
+        }
+        out << "+" << std::endl;
+    }
+}
+
+    Check if m_width and m_height are greater than 0 and if label is not nullptr.
+    Output top border of rectangle using + and -. Output label with spacing inside rectangle.
+    Output remaining lines to complete  rectangle. Output bottom border of rectangle.
+
+Functions define behavior of Rectangle class. Class represent rectangle with a label, width, and height. The getSpecs function read this values from input stream, and draw function output a representation of rectangle to an output stream.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Main:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   Create instances of Line and Rectangle and read data from user for Line and Rectangle, reads shape data from file ws8data.csv and print shapes.
+
+ ---Line BadOne;: instance of Line class with default constructor, which result in line with length of 0.
+ ---Rectangle BadRectangle("Bad one", 1, 1);: instance of Rectangle class with label "Bad one", width 1, and height 1.
+ ---Line* L = new Line("Separator", 50);: dynamic instance of Line class with label "Separator" and a length of 50.
+ ---Rectangle* R = new Rectangle("Container", 30, 5);: dynamic instance of Rectangle class with label "Container", width 30, and height 5.
+ ---Shape* S[2] = { L, R };: array of Shape pointers and assigns addresses of the Line and Rectangle objects. 
+cout << *S[0] << endl << *S[1] << endl;: printing both Line and Rectangle objects using base class pointer array.
+delete S[0]; and delete S[1];: delete dynamically allocated Line and Rectangle objects to avoid memory leaks.
+
+Read data from a file:
+code read data from file and dynamically creates objects based on type in the file - L for Line and R for Rectangle.
+
+
+		    +--------------------------------+
+		    |				     |
+		    |	            MS3              |
+		    |				     |
+	            +--------------------------------+
+
+In this Milestone, iProduct and Item classes was created. 
+iProduct is interface for an Item in the application, Item is a concrete iProduct to keep track of quantity and on-hand-quantity items to be prepared for shipping. 
+////////
+iProduct
+////////
+iProduct is an abstract base class with pure virtual functions, defining an interface for products.
+It includes functions for reading and modify product information, perform operations on quantities, and display product details.
+
+////////
+  Item
+////////
+Item is a concrete class that contain implementation of iProduct virtual functions.It include functions to read, display and modify information about items. Clear function is used to clean dynamically allocated memory and reset the Item.
+
+
+Default constructor 
+Item::Item() : m_status(), m_sku(0), m_price(0.0), m_quantityOnHand(0), m_neededQuantity(0), m_description(nullptr), m_linearFlag(false) , m_defaultLinearFlag(false) {
+    } Initialize member variables to default values.
+
+
+Parameterized constructor 
+Item::Item(int sku, const char* desc, double price, int qtyNeeded, int qtyOnHand)
+        : m_status(desc) , m_sku(sku), m_price(price), m_quantityOnHand(qtyOnHand), m_neededQuantity(qtyNeeded), m_description(nullptr) , m_linearFlag(false), m_defaultLinearFlag(false) {
+    }Initialize member variables with provided values.
+  
+
+Destructor  
+Item::~Item() {
+        clear();
+    } Call clear() function to release dynamically allocated memory.
+
+
+Item::Item(const Item& other) {
+        *this = other;
+    }create copy of another Item object.
+
+
+Copy assignment operator 
+Item& Item::operator=(const Item& other) {
+        if (this != &other) {
+            clear();
+            m_sku =other.m_sku;
+            m_price= other.m_price ;
+            m_quantityOnHand =other.m_quantityOnHand;
+            m_neededQuantity= other.m_neededQuantity;
+            m_linearFlag =other.m_linearFlag ;
+            m_status = other.m_status;
+            m_description = new char[ strlen(other.m_description) + 1 ];
+            strcpy(m_description, other.m_description) ;
+        }
+        return *this;
+    }do deep copy of another Item object.
+
+
+Quantity subtraction 
+int Item::operator-=(int qty) {
+        if (qty > 0) {
+            m_quantityOnHand -= qty;
+            if (m_quantityOnHand < 0 ) {
+                m_quantityOnHand = 0;
+            }
+        }
+        return m_quantityOnHand ;
+    }subtract specified quantity from on-hand quantity.
+     Ensure on-hand quantity do not go below zero.
+
+
+Quantity addition  
+int Item::operator+=(int qty) {
+        if (qty > 0) {
+            m_quantityOnHand += qty ;
+        }
+        return m_quantityOnHand;
+    }Add specified quantity to on-hand quantity.
+
+
+Conversion to double 
+Item::operator double() const {
+        return m_price;
+    }Convert object to double (return price).
+
+
+Conversion to bool 
+Item::operator bool() const {
+        return m_status ;
+    }Convert object to bool (return status).
+
+
+Quantity needed getter
+int Item::qtyNeeded() const {
+        return m_neededQuantity;
+    }Return quantity needed.
+
+
+Quantity getter     
+int Item::qty() const {
+        return m_quantityOnHand;
+    }Return on-hand quantity.
+
+
+Linear setter    
+void Item::linear(bool isLinear) {
+        m_linearFlag = isLinear ;
+    }Set linear flag to control display format.
+
+
+Save to file operator  
+std::ofstream& Item::save(std::ofstream& ofstr) const {
+        if (m_status) {
+            ofstr <<"\n"<< m_sku<<"\t" <<m_description<< "\t" <<m_quantityOnHand<< "\t" <<m_neededQuantity<<"\t";
+            ofstr.setf(std::ios::fixed) ;
+            ofstr.precision(2);
+            ofstr << m_price ;
+        }
+        return ofstr;
+    }Write item information to output file stream in specific format with tab separators.
+
+
+Load from file operator  
+std::ifstream& Item::load(std::ifstream& ifstr) {
+        delete[] m_description;
+        m_description = nullptr;
+        char tempDesc[2000];
+        ifstr >> m_sku;
+        ifstr.ignore(); 
+        ifstr.getline(tempDesc, 2000, '\t'); 
+        ifstr >> m_quantityOnHand >> m_neededQuantity >> m_price;
+        
+        if (ifstr.fail()) {
+            m_status = "Input file stream read failed!";
+        } else {
+            m_description = new char[strlen(tempDesc) + 1];
+            strcpy(m_description, tempDesc);
+            if (ifstr.peek() == '\n') {
+                ifstr.ignore();
+            }
+        }
+        
+        return ifstr;
+    }Read item information from input file stream. It is delete any existing m_description data to avoid memory leaks. Declare temporary array tempDesc to store description , Read SKU, description, quantity on hand, needed quantity and price from input file stream. Check if fs is fail state. If yes, it set error message in m_status member. If reading is successful, allocate memory for m_description member, copy description data. Check newline character in file stream and ignore it(for case where next item in file starts on new line). After it return input file stream. Returninf stream allow multiple input operations.
+
+
+Display operator  
+std::ostream& Item::display(std::ostream& ostr) const {
+        if (m_status) {
+            if (m_linearFlag) {
+                std::string truncatedDescription = m_description;
+                if (truncatedDescription.length() > 35) {
+                    truncatedDescription = truncatedDescription.substr(0, 35);
+                }
+
+                ostr << std::setw(5) << m_sku << " | " << std::setw(35) << std::left << truncatedDescription
+                    << " | " << std::setw(4) << std::right << m_quantityOnHand << " | " << std::setw(4)  << std::right << m_neededQuantity
+                    << " | " << std::setw(7) << std::fixed << std::setprecision(2)<< std::right << m_price << " |";
+            } else {
+                ostr << "AMA Item:" << std::endl;
+                ostr << m_sku << ": " << m_description << std::endl;
+                ostr << "Quantity Needed: " << m_neededQuantity << std::endl;
+                ostr << "Quantity Available: " << m_quantityOnHand << std::endl;
+                ostr << "Unit Price: $" << std::fixed << std::setprecision(2) << m_price << std::endl;
+                ostr << "Needed Purchase Fund: $" << std::fixed << std::setprecision(2) << m_price * (m_neededQuantity - m_quantityOnHand) << std::endl;
+            }
+        } else {
+            ostr << m_status;
+        }
+        return ostr;
+    }Output item information to an output stream based on linear flag.
+
+
+SKU read
+int Item::readSku(std::istream& istr) {
+        bool firstAttempt = true;
+            int skuValue;
+        while (true) {
+            if (firstAttempt ) {
+                std::cout << "SKU: ";
+            }
+            if (!(istr >> skuValue)) {
+                istr.clear();
+                std::string temp;
+                getline(istr, temp); 
+                std::cout << "Invalid Integer, retry: ";
+                firstAttempt = false;
+            } else if (skuValue < 40000 || skuValue > 99999) {
+                istr.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                std::cout << "Value out of range [40000<=val<=99999]: ";
+                firstAttempt = false;
+                
+            } else {
+                istr.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                    m_sku = skuValue;
+                break;
+            }
+        }
+        return m_sku; 
+    } It read SKU from input stream and validating input range.To clear input buffer after using getline to read input string, in order to remove remaining characters (including the new line) before further input operations, I used istr.ignore(std::numeric_limits<std::streamsize>::max(), '\n').
+
+
+Item read 
+ std::istream& Item::read(std::istream& istr)  {  
+    std::cout << "AMA Item:" << std::endl ;
+    std::cout << "SKU: " << m_sku << std::endl;
+    std::cout << "Description: ";
+
+    char tempDesc[2000] ;
+    int tempQtyNeeded, tempQtyOnHand;
+    double tempPrice ;
+
+    //Use getline to read description of item (up to 2000 characters) from input stream. 
+    istr.getline(tempDesc, 2000, '\n');
+    bool firstAttempt = true;
+
+    //Prompt for quantity needed.
+    //Handle cases whereinput is not valid integer or falls outside specified range [1, 9999]. Repeat prompt until valid input.
+    while (true) {
+        if (firstAttempt) {
+            std::cout << "Quantity Needed: " ;
+        }
+        if (!(istr >> tempQtyNeeded)) {
+            // Handle non-integer input
+            istr.clear(); // Clear error flag
+            std::string tempQN ;
+            getline(istr, tempQN); // Consume the invalid input
+            std::cout << "Invalid Integer, retry: ";
+            firstAttempt = false; // Set to false 
+        } else if (istr.fail() || tempQtyNeeded < 1 || tempQtyNeeded > 9999) {
+            // Handle out of range input
+            istr.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Consume invalid input
+            std::cout << "Value out of range [1<=val<=9999]: " ;
+            firstAttempt = false ;
+        } else {
+            // Valid input; consume the newline character and exit the loop
+            istr.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            break;
+        }
+    }
+
+    firstAttempt = true;
+
+    //Prompt for quantity on hand.
+    //Handle cases where input is not valid int, fall outside specified range [0, Quantity Needed], or is greater than Quantity Needed. Repeat prompt until valid input.
+
+    while (true) {
+        if (firstAttempt) {
+            std::cout << "Quantity On Hand: ";
+        }
+        if (!(istr >> tempQtyOnHand)) {
+            // Handle non-integer input
+            istr.clear(); // Clear error flag
+            std::string tempQOH ;
+            getline(istr, tempQOH); // Consume invalid input
+            std::cout << "Invalid Integer, retry: ";
+            firstAttempt = false;
+        } else if (istr.fail() || tempQtyOnHand < 0 || tempQtyOnHand > tempQtyNeeded) {
+            // Handle out of range input
+            istr.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Consume invalid input
+            std::cout << "Value out of range [0<=val<=" << tempQtyNeeded << "]: ";
+            firstAttempt = false; 
+        } else {
+            // Valid input; consume newline character and exit loop
+            istr.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            break ;
+        }
+    }
+
+    firstAttempt = true;
+
+    //Read and validate Unit Price
+    //Prompt for unit price.
+    //Handle cases where input is not a valid floating-point number or fall outside specified range [0.00, 9999.00].
+    //Repeat prompt until valid input is received.
+    while (true) {
+        if (firstAttempt) {
+            std::cout << "Unit Price: $";
+        }
+        if (!(istr >> tempPrice)) {
+            // Handle non-floating-point input
+            istr.clear(); // Clear error flag
+            std::string tempPriceStr ;
+            getline(istr, tempPriceStr); // Consume invalid input
+            std::cout << "Invalid number, retry: " ;
+            firstAttempt = false;
+        } else if (istr.fail() || tempPrice < 0.0 || tempPrice > 9999.0) {
+            // Handle out-of-range input
+            istr.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Consume invalid input
+            std::cout << "Value out of range [0.00<=val<=9999.00]: ";
+            firstAttempt = false ;
+        } else {
+            // Valid input; consume newline character and exit the loop
+            istr.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            break;
+        } 
+    }
+
+    // Set member variables with validated values
+    //Allocate memory frog description and copy input.
+    //Set other member variables with validated input.
+
+    m_description = new char[strlen(tempDesc) + 1];
+    strcpy(m_description, tempDesc);
+    m_neededQuantity =tempQtyNeeded;
+    m_quantityOnHand = tempQtyOnHand;
+    m_price= tempPrice;
+
+    // Clear status state
+    m_status.clear();
+
+    //return input stream 
+    return istr;
+}Read item information from input stream, prompting for input.
+
+ 
+Equal operator bool 
+Item::operator==(int sku) const {
+        return m_sku == sku ;
+    } Check if SKU of item is equal to provided SKU.
+
+
+bool Item::operator==(const char* description) const {
+        return (m_description && description && strstr( m_description, description) != nullptr ) ;
+    }Check if description of item contain provided substring.
+
+
+Clear function    
+void Item::clear() {
+        delete[] m_description;
+        m_description= nullptr ;
+        m_status =0;
+        m_sku = 0 ;
+        m_price= 0.0 ;
+        m_quantityOnHand = 0;
+        m_neededQuantity = 0 ;
+        m_linearFlag= m_defaultLinearFlag; 
+    }Release dynamically allocated memory and reset member variables.
+	
