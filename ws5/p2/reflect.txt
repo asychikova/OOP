@@ -1,0 +1,172 @@
+/*
+*****************************************************************************
+                          OOP244 Workshop - #5 REFLECTION (P2)
+Full Name  : Anna Sychikova
+Student ID#: 159363217
+Email      : asychikova@myseneca.ca
+Section    : NCC
+Date       : 2023.10.16
+*****************************************************************************
+*/
+ This week, special attention was paid to such concepts as binary member operators, type conversion operators and helper operator between a primitive type and a class.
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		  	   Binary member operators:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Operators that operate on two operands and are member functions of the class. In WS5P 2, the binary member operators += and -= are overloaded for the Portfolio class. These operators allow add and subtract values from the m_value variable of portfolio instances.
+
+Portfolio& Portfolio::operator+=(double value) { //defines operator, double as parameter
+    if (*this && value >= 0) { //checks if object valid, checks if value valid
+        m_value += value; // adds value of other object to this object 
+    }
+    return *this; //return current object
+}
+
+For example: Portfolio object portf with m_value set to 4000, call p += 650;, 
+the m_value of p will become 4650 if p is considered valid. If p is not valid or the value is negative, m_value will be unchanged.
+
+-= Works in the same way as += operator but subtract from value passed parameter
+Portfolio& Portfolio::operator-=(double value) {
+    if (*this && value >= 0) {
+        m_value -= value;
+    }
+    return *this;
+}
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+			  Type conversion operators:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Special member functions that allow to object of one class type to be converted to another type. Conversion operators are overloaded to convert portfolio objects to double, const char*, char and bool: 
+
+Returns the m_value member variable, which represents the value of the portfolio in double:
+Portfolio::operator double() const {
+    return m_value;
+}
+
+//overload allows objects of the Portfolio class to be converted to a double when + operator is used
+
+double total = Portfolios[2] + Portfolios[5];
+
+Returns the m_stock member variable, which represents the value of the portfolio in C-style string:
+Portfolio::operator const char*() const {
+    return m_stock;
+}
+
+    cout << "Stock: " << (const char*)(Portfolios[1]);
+
+
+Returns the m_type member variable, which represents the value of the portfolio in char:
+Portfolio::operator char() const {
+    return m_type;
+}
+cout << " Type: " << char(*this);
+
+
+Returns true if all conditions matched, otherwise returns false
+Portfolio::operator bool() const {
+    return (m_value >= 0 && (m_type == 'G' || m_type == 'V' || m_type == 'I'));
+}
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+			        Unary operators:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Unary operators operate with single operand. Checks if the Portfolio object is invalid (negative value):
+
+bool Portfolio::operator~() const {
+    return (m_value < 0);
+}
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	   Helper operator between a primitive type and a class:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Friend functions have access to private members of class, they can operate on class objects if the members are private. 
+
+Friend function double operator+(const Portfolio& left, const Portfolio& right) is helper operator. 
+Function allows the addition of two Portfolio objects and return the result as a double: 
+
+double operator+(const Portfolio& left, const Portfolio& right) {
+    return static_cast<double>(left) + static_cast<double>(right);
+}
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+			    How the code works:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Array of Portfolio objects is crated : 
+Portfolio Portfolios[] = {
+    {300000, "Fitzer", 'F'},   // invalid
+    {400000, "Fitzer", 'G'},
+    {500000, "Honda", 'I'},
+    {140000, "RIM", 'V'},
+    {-500000, "Nortel", 'V'},  // invalid
+    {95000, "Nvdia", 'G'}
+};
+
+displayPortfolios function is called to display the portfolios.
+
+total = Portfolios[2] + Portfolios[5]; calculates the total investment by adding the values of Portfolios[2] and Portfolios[5] using the operator+. 
+
+cout << " Total Investment in " << (const char*)(Portfolios[2]) << " and " << (const char*)(Portfolios[5]) << " is:  " << total << endl; prints the total investment for the portfolios[2] and portfolios[5].
+
+
+total += Portfolios[1];
+total += Portfolios[5];
+operator+= is called to add values of Portfolios[1] and Portfolios[5] to the total variable.
+
+Portfolios[2] >> Portfolios[3];
+operator>> transfers the value from Portfolios[2] to Portfolios[3] 
+
+Portfolios[1] << Portfolios[5];
+operator<< function transfers the value from Portfolios[1] to Portfolios[5] 
+
+Portfolios[5] += 250005.50;
+Portfolios[4] -= 150000.50;
+These lines use operator+= and operator-= functions to add and subtract values from Portfolios[5] and Portfolios[4]
+
+Portfolios[3] += 60000.50;
+Portfolios[1] -= 95000.00;
+operator+= and operator-= functions to add and subtract values from Portfolios[3] and Portfolios[1]
+
+PORTFOLIO
+
+Class Members:
+
+    m_value: value of the portfolio in double.
+    m_stock: stock name as a character array.
+    m_type:  type of portfolio as a char ('G', 'V', or 'I')
+
+
+Default Constructor (Portfolio()) and emptyPortfolio():
+Initializes m_value to 0, m_stock to empty string, and m_type to 'E' (empty)
+
+3 arg constructor (Portfolio(double value, const char* stock, char type)) :
+Initializes the portfolio with provided values if they are valid.
+
+operator double() const: Converts the portfolio object to a double (returns m_value).
+Why we use this? We use type conversion operators because instead of extracting m_value member every time , it is easier to use Portfolio object directly. 
+without type conversion: 
+cout << " Total Investment in " << Portfolios[2].getStock() << " and " << Portfolios[5].getStock() << " is:  "; using getters
+operator const char*() const: Converts the portfolio object to a const char* (returns m_stock).
+operator char() const: Converts the portfolio object to a char (returns m_type).
+
+operator bool() const: Checks if the portfolio is active based on its value and type.
+operator~() const: Checks if the portfolio's value is negative.
+
+operator+= and operator-=
+Modify portfolio's value
+
+operator+: Adds two Portfolio objects and returns result in double.
+operator+=: Adds a Portfolio object's value to double.
+operator>>: Transfers the value from one Portfolio object to another and empty the source object.
+operator<<: Adds Portfolio object's value to another and empty source obj.
+
+display() const: Displays portfolio's information 
+dispPortfolio() const: Displays portfolio name, value, and type 
