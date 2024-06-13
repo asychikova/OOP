@@ -1,14 +1,4 @@
 # OOP
-/*
-*****************************************************************************
-             OOP244 FINAL PROJECT - REFLECTION and NOTES from OOP244
-Full Name  : Anna Sychikova
-Student ID#: 159363217
-Email      : asychikova@myseneca.ca
-Section    : NCC
-Date       : 2023.11.26
-*****************************************************************************
-*/
 
 
    	    +--------------------------------+
